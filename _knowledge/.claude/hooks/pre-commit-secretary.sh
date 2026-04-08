@@ -1,0 +1,130 @@
+#!/bin/bash
+# Hook: pre-commit-secretary
+# Fires before git commit (PreToolUse). Reminds Claude to run secretary protocol.
+
+cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || exit 0
+git rev-parse --git-dir > /dev/null 2>&1 || exit 0
+
+# Check what's staged/changed
+CHANGED=$(git status --porcelain --no-renames 2>/dev/null | awk '{print $NF}')
+
+HAS_DECISIONS=false
+HAS_DOCS=false
+HAS_ROADMAP=false
+HAS_INDEX=false
+HAS_DOCS_INDEX=false
+HAS_DOMAIN_INDEX=false
+HAS_DOCS_DOMAIN_INDEX=false
+HAS_SESSIONS=false
+
+for file in $CHANGED; do
+  case "$file" in
+    meta/decisions/*/*.md)
+      case "$file" in
+        */_index.md) HAS_DOMAIN_INDEX=true ;;
+        *) HAS_DECISIONS=true ;;
+      esac
+      ;;
+    meta/docs/*/*.md)
+      case "$file" in
+        */_index.md) HAS_DOCS_DOMAIN_INDEX=true ;;
+        *) HAS_DOCS=true ;;
+      esac
+      ;;
+    meta/roadmap.md) HAS_ROADMAP=true ;;
+    meta/sessions.md) HAS_SESSIONS=true ;;
+    meta/decisions/_index.md) HAS_INDEX=true ;;
+    meta/docs/_index.md) HAS_DOCS_INDEX=true ;;
+  esac
+done
+
+# Build warnings
+WARNINGS=""
+
+if [ "$HAS_DECISIONS" = true ]; then
+  if [ "$HAS_DOMAIN_INDEX" = false ]; then
+    WARNINGS="${WARNINGS}\n⚠ Decisions изменены, но доменный _index.md не обновлён!"
+  fi
+  if [ "$HAS_INDEX" = false ]; then
+    WARNINGS="${WARNINGS}\n⚠ Decisions изменены, но hub _index.md не обновлён!"
+  fi
+fi
+
+if [ "$HAS_DOCS" = true ]; then
+  if [ "$HAS_DOCS_DOMAIN_INDEX" = false ]; then
+    WARNINGS="${WARNINGS}\n⚠ Docs изменены, но доменный docs/_index.md не обновлён!"
+  fi
+  if [ "$HAS_DOCS_INDEX" = false ]; then
+    WARNINGS="${WARNINGS}\n⚠ Docs изменены, но hub docs/_index.md не обновлён!"
+  fi
+fi
+
+if [ "$HAS_SESSIONS" = false ] && [ "$HAS_ROADMAP" = false ]; then
+  WARNINGS="${WARNINGS}\n⚠ Ни roadmap.md, ни sessions.md не обновлены!"
+fi
+
+# Always show secretary checklist
+echo ""
+echo "📋 СЕКРЕТАРСКИЙ ПРОТОКОЛ:"
+echo "  1. Провёл ли FAR-аудит? (WARM → roadmap)"
+echo "  2. Есть ли незаписанные решения? → decisions/"
+echo "  3. Есть ли несохранённое исследование? → docs/"
+echo "  4. Обновлён ли roadmap.md?"
+echo "  5. Старые сессионные блоки — что поглощено?"
+echo "  6. Решение с ⚠ → в _index.md?"
+echo "  7. Новый файл → обновлён _index.md (доменный + hub)?"
+
+# Validate: orphans against domain _index files
+if [ "$HAS_DECISIONS" = true ]; then
+  ORPHANS=""
+  for f in meta/decisions/*/*.md; do
+    [ -f "$f" ] || continue
+    case "$f" in
+      */_index.md|*/_tags.md) continue ;;
+    esac
+    CODE=$(head -1 "$f" | sed 's/^# \([^ ]*\).*/\1/')
+    if [ -n "$CODE" ]; then
+      if grep -q "^- \*\*Статус\*\*:.*draft" "$f" 2>/dev/null; then
+        continue
+      fi
+      DOMAIN_DIR=$(dirname "$f")
+      DOMAIN_INDEX="$DOMAIN_DIR/_index.md"
+      if [ -f "$DOMAIN_INDEX" ]; then
+        if ! grep -q "$CODE" "$DOMAIN_INDEX" 2>/dev/null; then
+          ORPHANS="${ORPHANS}\n  - $f ($CODE) — нет в $DOMAIN_INDEX"
+        fi
+      else
+        ORPHANS="${ORPHANS}\n  - $f ($CODE) — доменный _index.md отсутствует!"
+      fi
+    fi
+  done
+
+  # Check that all domains with ADR files have entries in hub
+  HUB="meta/decisions/_index.md"
+  if [ -f "$HUB" ]; then
+    for domain_dir in meta/decisions/*/; do
+      [ -d "$domain_dir" ] || continue
+      domain=$(basename "$domain_dir")
+      adr_count=$(ls "$domain_dir"/*.md 2>/dev/null | grep -cv '_index.md\|_tags.md' 2>/dev/null)
+      if [ "$adr_count" -gt 0 ]; then
+        if ! grep -qi "$domain" "$HUB" 2>/dev/null; then
+          WARNINGS="${WARNINGS}\n⚠ Домен '$domain' не найден в hub _index.md!"
+        fi
+      fi
+    done
+  fi
+
+  if [ -n "$ORPHANS" ]; then
+    echo ""
+    echo "🔍 Orphan файлы (accepted без записи в _index.md):"
+    echo -e "$ORPHANS"
+  fi
+fi
+
+if [ -n "$WARNINGS" ]; then
+  echo ""
+  echo -e "$WARNINGS"
+fi
+
+echo ""
+exit 0
