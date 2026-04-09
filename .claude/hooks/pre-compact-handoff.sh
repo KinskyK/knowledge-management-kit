@@ -1,7 +1,7 @@
 #!/bin/bash
 # Hook: pre-compact-handoff
 # Fires before context compaction (PreCompact).
-# Checks if WARM was already saved to roadmap. If not — CRITICAL warning.
+# Checks if WARM was already saved to sessions.md. If not — CRITICAL warning.
 # If yes — soft reminder to verify completeness.
 
 cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || exit 0
@@ -10,7 +10,7 @@ ROADMAP="meta/roadmap.md"
 SESSIONS="meta/sessions.md"
 [ ! -f "$ROADMAP" ] && exit 0
 
-# Check if roadmap has uncommitted changes (WARM was written but not committed)
+# Check if roadmap/sessions have uncommitted changes (WARM was written but not committed)
 HAS_DIFF=false
 git diff --quiet "$ROADMAP" 2>/dev/null || HAS_DIFF=true
 
@@ -44,14 +44,14 @@ if [ "$HAS_DIFF" = true ] || [ "$RECENT_MODIFY" = true ] || [ "$SESSIONS_DIFF" =
   # WARM was likely saved — soft reminder
   cat <<'JSON'
 {
-  "systemMessage": "⚠️ КОМПРЕССИЯ КОНТЕКСТА. roadmap.md обновлялся недавно — проверь что WARM-резидуал полный:\n1. Все ли решения записаны в decisions/?\n2. Все ли исследования сохранены в docs/?\n3. HOT-задачи актуальны в roadmap?\nПосле проверки — компрессия безопасна."
+  "systemMessage": "⚠️ КОМПРЕССИЯ КОНТЕКСТА. sessions.md / roadmap.md обновлялись недавно — проверь что WARM-резидуал полный:\n1. Все ли решения записаны в decisions/?\n2. Все ли исследования сохранены в docs/?\n3. HOT-задачи актуальны в roadmap?\n4. WARM записан в sessions.md?\nПосле проверки — компрессия безопасна."
 }
 JSON
 else
   # WARM NOT saved — CRITICAL
   cat <<'JSON'
 {
-  "systemMessage": "🚨 CRITICAL: КОМПРЕССИЯ КОНТЕКСТА, но roadmap.md / sessions.md НЕ обновлялись в этой сессии!\nWARM-резидуал будет ПОТЕРЯН при компрессии.\nНЕМЕДЛЕННО:\n1. Запиши что сейчас в HOT (задача, вопросы)\n2. Запиши WARM-резидуал в meta/sessions.md\n3. Есть ли незаписанные решения → decisions/?\n4. Есть ли несохранённое исследование → docs/?\nТолько после записи компрессия безопасна."
+  "systemMessage": "🚨 CRITICAL: КОМПРЕССИЯ КОНТЕКСТА, но sessions.md / roadmap.md НЕ обновлялись в этой сессии!\nWARM-резидуал будет ПОТЕРЯН при компрессии.\nНЕМЕДЛЕННО:\n1. Запиши что сейчас в HOT (задача, вопросы)\n2. Запиши WARM-резидуал в meta/sessions.md (формат: ### Сессия YYYY-MM-DD — тема + Темы: ключевые слова)\n3. Есть ли незаписанные решения → decisions/?\n4. Есть ли несохранённое исследование → docs/?\nТолько после записи компрессия безопасна."
 }
 JSON
 fi

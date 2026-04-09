@@ -41,10 +41,14 @@ fi
 # --- Check 3: Load last session context ---
 SESSIONS="meta/sessions.md"
 if [ -f "$SESSIONS" ]; then
-  LAST_SESSION=$(grep -n "^### Сессия" "$SESSIONS" | head -1 | cut -d: -f1)
+  SESSION_COUNT=$(grep -c "^### Сессия" "$SESSIONS" 2>/dev/null || echo "0")
+  LAST_SESSION=$(grep -n "^### Сессия" "$SESSIONS" | tail -1 | cut -d: -f1)
   if [ -n "$LAST_SESSION" ]; then
     OUTPUT="${OUTPUT}\n📋 Последний сессионный контекст (sessions.md):\n"
     OUTPUT="${OUTPUT}$(tail -n +$LAST_SESSION "$SESSIONS" | head -20)\n"
+    if [ "$SESSION_COUNT" -gt 1 ]; then
+      OUTPUT="${OUTPUT}\n📂 В sessions.md ещё $((SESSION_COUNT - 1)) блоков. При недопонимании или споре о контексте решения — читай ранние блоки (deep dive).\n"
+    fi
   fi
 fi
 

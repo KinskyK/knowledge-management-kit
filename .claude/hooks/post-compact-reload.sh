@@ -39,11 +39,11 @@ if sessions_path:
     try:
         with open(sessions_path, 'r', encoding='utf-8') as f:
             sessions_content = f.read()
-        sessions_blocks = re.split(r'(?=^### Сессия )', sessions_content, flags=re.MULTILINE)
-        for block in sessions_blocks:
-            if block.startswith('### Сессия '):
-                latest_session = block.strip()
-                break
+        sessions_blocks = [b for b in re.split(r'(?=^### Сессия )', sessions_content, flags=re.MULTILINE) if b.startswith('### Сессия ')]
+        if sessions_blocks:
+            latest_session = sessions_blocks[-1].strip()
+            if len(sessions_blocks) > 1:
+                latest_session += f"\n\n📂 В sessions.md ещё {len(sessions_blocks) - 1} блоков. При недопонимании или споре о контексте решения — читай ранние блоки (deep dive)."
     except Exception:
         pass
 

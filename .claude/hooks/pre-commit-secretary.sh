@@ -66,7 +66,7 @@ fi
 # Always show secretary checklist
 echo ""
 echo "📋 СЕКРЕТАРСКИЙ ПРОТОКОЛ:"
-echo "  1. Провёл ли FAR-аудит? (WARM → roadmap)"
+echo "  1. Провёл ли FAR-аудит? (WARM → sessions.md)"
 echo "  2. Есть ли незаписанные решения? → decisions/"
 echo "  3. Есть ли несохранённое исследование? → docs/"
 echo "  4. Обновлён ли roadmap.md?"
@@ -118,6 +118,21 @@ if [ "$HAS_DECISIONS" = true ]; then
     echo ""
     echo "🔍 Orphan файлы (accepted без записи в _index.md):"
     echo -e "$ORPHANS"
+  fi
+fi
+
+# Validate sessions.md block format (Темы: line)
+if [ "$HAS_SESSIONS" = true ] && [ -f "meta/sessions.md" ]; then
+  MISSING_TOPICS=""
+  while IFS= read -r line_num; do
+    LINE1=$(sed -n "$((line_num + 1))p" "meta/sessions.md")
+    LINE2=$(sed -n "$((line_num + 2))p" "meta/sessions.md")
+    if ! echo "$LINE1" | grep -q "^Темы:" && ! echo "$LINE2" | grep -q "^Темы:"; then
+      MISSING_TOPICS="${MISSING_TOPICS}\n  - строка ${line_num}: блок без строки 'Темы:'"
+    fi
+  done < <(grep -n "^### Сессия" "meta/sessions.md" | cut -d: -f1)
+  if [ -n "$MISSING_TOPICS" ]; then
+    WARNINGS="${WARNINGS}\n⚠ sessions.md: блоки без ключевых слов (строка 'Темы:' после заголовка):${MISSING_TOPICS}"
   fi
 fi
 
