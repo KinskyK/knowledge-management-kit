@@ -62,6 +62,24 @@ ADR-формат:
 
 ---
 
+## Протокол извлечения троек (GraphRAG)
+
+При наличии GraphRAG (`/graphrag extract` доступен):
+
+После записи/изменения ADR — извлеки тройки:
+1. Сущности: решение (код), связанные концепции, проблемы, механизмы
+2. Связи: из полей "Зависит от"/"Влияет на" (weight 1.0) + из текста (weight 0.7-0.9)
+3. Чанки: секции "Решение" + "Почему" + "Отвергнуто"
+
+Каноничность имён: одна сущность = одно имя. "FAR Protocol", не "FAR" / "Full Attention Residuals" / "ФАР". Проверяй `check_entity` перед созданием.
+
+Типы сущностей: decision, concept, problem, domain, mechanism, file.
+Типы связей: depends-on, influences, solves, part-of, supersedes, rejected, requires, enables, contradicts.
+
+Шаблон: `templates/extraction-template.json`.
+
+---
+
 ## Жизненный цикл ⚠ триггеров пересмотра
 
 Триггеры "Пересмотреть если" живут в decisions/_index.md (⚠ маркер).
