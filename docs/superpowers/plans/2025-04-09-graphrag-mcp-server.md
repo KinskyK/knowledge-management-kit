@@ -648,10 +648,11 @@ class GraphRAGBridge:
                 max_token_size=config.max_token_size,
             ),
         )
+        await rag.initialize_storages()
         return cls(rag)
 
     async def insert_kg(self, custom_kg: dict) -> dict:
-        await self._rag.insert_custom_kg(custom_kg)
+        await self._rag.ainsert_custom_kg(custom_kg)
         return {
             "entities": len(custom_kg.get("entities", [])),
             "relationships": len(custom_kg.get("relationships", [])),

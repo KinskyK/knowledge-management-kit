@@ -1,0 +1,15 @@
+# .graphrag/config.yaml — GraphRAG layer configuration
+# Copy to .graphrag/config.yaml and fill in values
+
+# Where LightRAG stores its data (graph + vectors + chunks)
+working_dir: .graphrag/data
+
+# Embedding model (runs locally, no API needed)
+embedding_model: intfloat/multilingual-e5-large
+embedding_dim: 1024
+max_token_size: 512
+
+# OpenRouter — for entity merge only (rare, pennies/month)
+# Get free key at https://openrouter.ai/keys
+openrouter_api_key: ""
+openrouter_model: google/gemma-3-12b-it:free

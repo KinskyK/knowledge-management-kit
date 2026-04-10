@@ -1,1 +1,8 @@
 .DS_Store
+
+# GraphRAG
+.graphrag/data/
+.graphrag/config.yaml
+graphrag_mcp/.venv/
+graphrag_mcp/__pycache__/
+graphrag_mcp/tests/__pycache__/
