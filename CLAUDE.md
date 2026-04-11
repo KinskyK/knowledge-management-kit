@@ -1,100 +1,100 @@
 # CLAUDE.md — claude-memory-kit
 
-## Модель проекта
+## Project Model
 <!-- brief:
-Принципы написания:
-1. Это ориентировка для нового агента. После прочтения он должен понимать: что за проект, какие ключевые концепции, какие ограничения, что сейчас в фокусе.
-2. Не дублировать то, что есть в roadmap или decisions. Brief = "что это и как думать", не "что делать".
-3. Структура: суть → ключевые концепции → текущее состояние → ограничения.
-4. Каждый абзац отвечает на вопрос, который возникнет у нового агента.
-5. Обновлять перезаписью секции, не добавлением строк. Если секция растёт — что-то лишнее.
-6. Бюджет: до 120 содержательных строк. Больше — вынести в отдельный файл.
-7. Приоритет: то, что непосредственно меняет поведение агента > то, что объясняет контекст.
-   Только текущее состояние, не история. Если не влияет на действия — не включай.
-8. Стиль: плотный, без вводных фраз. Каждое предложение несёт информацию.
+Writing principles:
+1. This is an orientation for a new agent. After reading, they should understand: what the project is, what the key concepts are, what the constraints are, what's currently in focus.
+2. Don't duplicate what's in roadmap or decisions. Brief = "what this is and how to think about it", not "what to do".
+3. Structure: essence → key concepts → current state → constraints.
+4. Each paragraph answers a question a new agent would have.
+5. Update by rewriting sections, not by appending lines. If a section grows — something is redundant.
+6. Budget: up to 120 substantive lines. More than that — extract to a separate file.
+7. Priority: what directly changes agent behavior > what explains context.
+   Only current state, not history. If it doesn't affect actions — don't include it.
+8. Style: dense, no filler phrases. Every sentence carries information.
 -->
 
-Claude Code теряет контекст между сессиями. claude-memory-kit даёт ему долговременную память: решения (ADR), задачи (roadmap), исследования (docs), граф зависимостей (/context). ~30 файлов, один промпт для установки.
+Claude Code loses context between sessions. claude-memory-kit gives it long-term memory: decisions (ADR), tasks (roadmap), research (docs), dependency graph (/context). ~30 files, one prompt to install.
 
-**Архитектура.** Трёхуровневая адресация: brief (что за проект) → roadmap (что делаем) → /context CODE (детали решения). Двухуровневые индексы: hub `_index.md` (таблица доменов) + доменные `{domain}/_index.md` (скелет). Sessions отделены от roadmap.
+**Architecture.** Three-level addressing: brief (what the project is) → roadmap (what we're doing) → /context CODE (decision details). Two-level indexes: hub `_index.md` (domain table) + domain `{domain}/_index.md` (skeleton). Sessions are separated from roadmap.
 
-**Ключевые механизмы:**
-- FAR (Full Attention Residuals) — проактивная сортировка контекста на HOT/WARM/COLD. Спецификация: `Full Attention Residuals.md`.
-- Секретарский протокол — pre-commit чеклист: FAR-аудит, незаписанные решения, обновление индексов.
-- Хуки: pre-commit, session-start, session-end, pre/post-compact, rebuild-index, lint-refs.
-- context.py — парсер графа зависимостей решений (forward/reverse/tag search).
+**Key mechanisms:**
+- FAR (Full Attention Residuals) — proactive context sorting into HOT/WARM/COLD. Specification: `Full Attention Residuals.md`.
+- Secretary Protocol — pre-commit checklist: FAR audit, unrecorded decisions, index updates.
+- Hooks: pre-commit, session-start, session-end, pre/post-compact, rebuild-index, lint-refs.
+- context.py — decision dependency graph parser (forward/reverse/tag search).
 
-**Формат поставки.** Папка `_knowledge/` копируется в целевой проект. INTEGRATION.md — скрипт для Claude: интервью → генерация файлов → адаптация под проект → удаление `_knowledge/`.
+**Delivery format.** The `_knowledge/` folder is copied into the target project. INTEGRATION.md is a script for Claude: interview → file generation → project adaptation → `_knowledge/` deletion.
 
-**Фаза:** pre-release. Система работает, идёт финализация перед публикацией.
+**Phase:** pre-release. The system works, finalization before publication is in progress.
 
-**Ограничения:**
-- Хуки специфичны для Claude Code (settings.local.json). Файловая структура универсальна.
-- Git — единственная система версий. Нет _archive/.
-- CLAUDE.md не должен превышать 200 строк. Если растёт — выносить.
+**Constraints:**
+- Hooks are specific to Claude Code (settings.local.json). The file structure is universal.
+- Git is the only version system. No _archive/.
+- CLAUDE.md must not exceed 200 lines. If it grows — extract content.
 
-> Brief = ориентировка. Для работы с конкретной механикой — `/context CODE`.
+> Brief = orientation. For working with a specific mechanism — `/context CODE`.
 
-## Инициализация
-Читай перед началом работы:
-1. agents/AGENT_PROTOCOL.md — протокол работы и роли
-2. meta/roadmap.md — стек задач, статусы
-3. meta/decisions/_index.md — hub решений (таблица доменов, счётчики, триггеры)
-4. meta/docs/_index.md — hub исследований (таблица тем)
+## Initialization
+Read before starting work:
+1. agents/AGENT_PROTOCOL.md — work protocol and roles
+2. meta/roadmap.md — task stack, statuses
+3. meta/decisions/_index.md — decisions hub (domain table, counters, triggers)
+4. meta/docs/_index.md — research hub (topic table)
 
-Доменные индексы: `meta/decisions/{domain}/_index.md` — подробный скелет домена. Подгружай когда задача касается конкретного домена.
-manifest (meta/project_manifest.md) — по запросу, когда задача касается файловой структуры.
-Decisions файлы (meta/decisions/{domain}/{CODE}.md) — подгружай по ссылкам из доменного _index когда задача их касается.
+Domain indexes: `meta/decisions/{domain}/_index.md` — detailed domain skeleton. Load when the task concerns a specific domain.
+manifest (meta/project_manifest.md) — on demand, when the task concerns file structure.
+Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the domain _index when the task concerns them.
 
-**Команды контекста:**
-- `/context CODE` — карта контекста (прямые/транзитивные зависимости, тематические пересечения)
-- `/context CODE!` — обратный граф (кто зависит от CODE)
-- `/context #tag` — все решения с этим тегом
+**Context commands:**
+- `/context CODE` — context map (direct/transitive dependencies, thematic intersections)
+- `/context CODE!` — reverse graph (what depends on CODE)
+- `/context #tag` — all decisions with this tag
 
-## Правила
-- Каждое принятое решение фиксируется сразу в decisions файл в ADR-формате
-- Структурные изменения (новый файл, переименование) отражаются в манифесте
-- Git — единственная система версий. Ручное версионирование файлов не ведётся
-- Git коммиты: когда пользователь говорит "закоммить" — Claude сам делает git add, составляет описание и коммитит + пушит
-- Перед работой всегда парафразируй задачу
-- При изменении decisions или манифеста — проверь актуальность этого файла и AGENT_PROTOCOL.md
+## Rules
+- Every accepted decision is recorded immediately in a decisions file in ADR format
+- Structural changes (new file, rename) are reflected in the manifest
+- Git is the only version system. Manual file versioning is not maintained
+- Git commits: when the user says "commit" — Claude does git add, composes a description, and commits + pushes
+- Always paraphrase the task before starting work
+- When changing decisions or the manifest — verify this file and AGENT_PROTOCOL.md are up to date
 
 ## Knowledge Management
-- **Секретарский протокол перед коммитом** (пункты 0-8):
-  0. Есть черновики в meta/drafts/? → прочитай, оформи решения в ADR + инсайты в sessions.md, удали обработанные
-  1. Провести FAR-аудит (WARM → sessions.md)
-  2. Есть ли незаписанные решения → decisions? (не забудь секцию "Отвергнуто"). Решение меняет смысл чего-то из Модели проекта → обнови brief
-  3. Есть ли несохранённое исследование → docs/?
-  4. Обновить roadmap.md (статусы) + sessions.md (сессионный контекст)
-  5. Просмотреть старые сессионные блоки → убрать поглощённое
-  6. Решение с "Пересмотреть если" → в decisions/_index.md
-  7. Новый/изменённый accepted файл → обнови доменный _index.md + hub _index.md
-  8. GraphRAG настроен (`.graphrag/config.yaml` существует)? → извлечь тройки из изменённых файлов: `/graphrag extract --changed`
-- **Модель проекта (brief)**: обновляется перезаписью секции, не добавлением строк. Бюджет до 120 содержательных строк. Если CLAUDE.md > 200 строк → вынести brief в отдельный файл.
-- **FAR → sessions.md**: WARM из FAR-аудита записывается в сессионный контекст (meta/sessions.md)
-- **Сессионный контекст** (meta/sessions.md): слияние блоков, не перезапись. Каждая сессия — отдельный блок. Формат блока: `### Сессия YYYY-MM-DD — краткая тема` + ключевые слова в первой строке тела `Темы: тема1, тема2`.
-- **Sessions deep dive**: sessions.md — архив с глубиной. Не ограничивайся последним блоком. Ищи по ключевым словам в строке `Темы:`.
-- **Триггеры deep dive** (переключение внимания на глубокий слой):
-  - Собираешься изменить решение → обрати внимание на секцию "Отвергнуто" в ADR-файле (она уже прочитана — переключи фрейм на "что уже пробовали")
-  - Обнаружил конфликт между решениями → ищи контекст в sessions.md по `Темы:`
-  - Пользователь спрашивает "почему не X" / "зачем именно так" → ответ может быть в сессионном блоке, а не в ADR
-  - Пользователь повторно поднимает тему, которая уже есть в sessions.md → проверь заголовки блоков, прежде чем нырять в тела
-- **Секция "Отвергнуто" в ADR**: рекомендуемая (не опциональная). Записывай отвергнутые альтернативы и причины отказа. Это глубокий слой — при пересмотре решения он предотвращает повторение уже отброшенных вариантов.
-- **Автозахват черновиков** (meta/drafts/): при принятии решения, обнаружении проблемы или изменении подхода — запиши черновик через `/draft`. Не дожидайся коммита. Включай: что решили, ПОЧЕМУ, что отвергли. Это сырьё для секретарского протокола.
-- **Push-эвристика**: подгружаешь контекст не-активной задачи → подумай о push (новая Глубина в roadmap)
-- **docs/**: перед ответом на вопрос по теме — прочитай файл из docs/. Не отвечай по памяти. Исследование проведено → сохрани в docs/.
-- **Теги**: при создании решения — сверься с meta/_tags.md
-- **Обратная совместимость**: после любого архитектурного изменения — пройти по КАЖДОМУ существующему компоненту (агент, skill, хук, протокол, файл) и спросить: "соответствует ли он новой реальности?" Не категориями — поштучно. Категории создают слепые зоны.
+- **Secretary Protocol before commit** (steps 0-8):
+  0. Are there drafts in meta/drafts/? → read them, formalize decisions in ADR + insights in sessions.md, delete processed ones
+  1. Perform FAR audit (WARM → sessions.md)
+  2. Are there unrecorded decisions → decisions? (don't forget the "Rejected" section). Decision changes the meaning of something in the Project Model → update brief
+  3. Is there unsaved research → docs/?
+  4. Update roadmap.md (statuses) + sessions.md (session context)
+  5. Review old session blocks → remove absorbed content
+  6. Decision with "Reconsider if" → in decisions/_index.md
+  7. New/changed accepted file → update domain _index.md + hub _index.md
+  8. GraphRAG configured (`.graphrag/config.yaml` exists)? → extract triples from changed files: `/graphrag extract --changed`
+- **Project Model (brief)**: updated by rewriting sections, not appending lines. Budget up to 120 substantive lines. If CLAUDE.md > 200 lines → extract brief to a separate file.
+- **FAR → sessions.md**: WARM from FAR audit is written to session context (meta/sessions.md)
+- **Session Context** (meta/sessions.md): merge blocks, don't overwrite. Each session is a separate block. Block format: `### Session YYYY-MM-DD — brief topic` + keywords in the first line of the body `Topics: topic1, topic2`.
+- **Sessions deep dive**: sessions.md is an archive with depth. Don't limit yourself to the last block. Search by keywords in the `Topics:` line.
+- **Deep dive triggers** (switching attention to a deep layer):
+  - About to change a decision → pay attention to the "Rejected" section in the ADR file (it's already been read — switch your frame to "what was already tried")
+  - Discovered a conflict between decisions → search for context in sessions.md by `Topics:`
+  - User asks "why not X" / "why exactly this way" → the answer may be in a session block, not in the ADR
+  - User raises a topic again that's already in sessions.md → check block headers before diving into bodies
+- **"Rejected" section in ADR**: recommended (not optional). Record rejected alternatives and reasons for rejection. This is a deep layer — when reconsidering a decision, it prevents repeating already-rejected options.
+- **Auto-capture drafts** (meta/drafts/): when a decision is made, a problem is discovered, or an approach changes — write a draft via `/draft`. Don't wait for commit. Include: what was decided, WHY, what was rejected. This is raw material for the Secretary Protocol.
+- **Push heuristic**: loading context for a non-active task → think about push (new Depth in roadmap)
+- **docs/**: before answering a question on a topic — read the file from docs/. Don't answer from memory. Research conducted → save to docs/.
+- **Tags**: when creating a decision — check against meta/_tags.md
+- **Backward compatibility**: after any architectural change — go through EVERY existing component (agent, skill, hook, protocol, file) and ask: "does it match the new reality?" Not by categories — one by one. Categories create blind spots.
 
-## FAR-протокол (Full Attention Residuals)
-Проактивное семантическое управление контекстом. Команда `/far` запускает аудит.
+## FAR Protocol (Full Attention Residuals)
+Proactive semantic context management. The `/far` command triggers an audit.
 
-Три слоя: **HOT** (активное, max 3-5 пунктов) → **WARM** (архив, тезисно) → **COLD** (сброс).
+Three layers: **HOT** (active, max 3-5 items) → **WARM** (archive, bullet points) → **COLD** (discard).
 
-Триггеры автоматического аудита:
-- Смена фазы работы
-- Закрытие крупной подзадачи
-- 8-12 обменов без аудита
-- Изменение направления
+Automatic audit triggers:
+- Work phase change
+- Completion of a major subtask
+- 8-12 exchanges without an audit
+- Direction change
 
-Спецификация: `Full Attention Residuals.md`
+Specification: `Full Attention Residuals.md`

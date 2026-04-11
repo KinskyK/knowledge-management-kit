@@ -1,112 +1,112 @@
 # Knowledge Management System for Claude Code
 
-## Что это
+## What is this
 
-Система управления знаниями для проектов с Claude Code. Claude записывает решения, ведёт стек задач, сохраняет исследования, передаёт контекст между сессиями и управляет своим вниманием. ~30 файлов.
+A knowledge management system for projects using Claude Code. Claude records decisions, maintains a task stack, saves research, passes context between sessions, and manages its own attention. ~30 files.
 
-Подробнее о каждом компоненте — в разделе "Как это работает" ниже.
+More about each component in the "How it works" section below.
 
-## Установка
+## Installation
 
-### Способ 1: Один промпт (рекомендуемый)
+### Method 1: One prompt (recommended)
 
-Откройте Claude Code в папке вашего проекта и вставьте:
+Open Claude Code in your project folder and paste:
 
 ```
-Скачай и установи Knowledge Management Kit:
+Download and install the Knowledge Management Kit:
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/KinskyK/knowledge-management-kit/main/install.sh)"
-Потом прочитай _knowledge/INTEGRATION.md и выполни интеграцию. Веди меня по шагам.
+Then read _knowledge/INTEGRATION.md and perform the integration. Guide me through the steps.
 ```
 
-Claude скачает систему, спросит о проекте и настроит всё автоматически.
+Claude will download the system, ask about your project, and set everything up automatically.
 
-### Способ 2: Ручная установка
+### Method 2: Manual installation
 
 ```bash
-# Скачать шаблон
+# Download the template
 curl -fsSL https://raw.githubusercontent.com/KinskyK/knowledge-management-kit/main/install.sh | bash
 
-# Открыть Claude Code и вставить промпт:
-# В корне проекта лежит папка _knowledge/. Прочитай _knowledge/INTEGRATION.md и выполни интеграцию.
+# Open Claude Code and paste the prompt:
+# There is a _knowledge/ folder in the project root. Read _knowledge/INTEGRATION.md and perform the integration.
 ```
 
-### Что произойдёт
+### What will happen
 
-Claude:
-- Спросит о проекте (название, описание, фаза, домены)
-- Проверит, есть ли уже CLAUDE.md, и сольёт — или создаст новый
-- Создаст директории и настроит хуки
-- Удалит папку `_knowledge/` после завершения
+Claude will:
+- Ask about the project (name, description, phase, domains)
+- Check if CLAUDE.md already exists and merge it — or create a new one
+- Create directories and set up hooks
+- Delete the `_knowledge/` folder after completion
 
-Ты только отвечаешь на вопросы и подтверждаешь.
+You just answer questions and confirm.
 
 ---
 
-## Как это работает
+## How it works
 
-### Проблема
+### The problem
 
-Claude Code не помнит ничего между сессиями. Каждый раз ты начинаешь с чистого листа: что решили, почему, что в работе — всё теряется. В длинных сессиях забывает начало разговора. Решения тонут в шуме.
+Claude Code remembers nothing between sessions. Every time you start from scratch: what was decided, why, what's in progress — everything is lost. In long sessions it forgets the beginning of the conversation. Decisions drown in noise.
 
-### Что делает система
+### What the system does
 
-1. **Модель проекта (CLAUDE.md brief)** — секция "Модель проекта" в CLAUDE.md даёт новому агенту рабочую ментальную модель за одно прочтение. HTML-комментарий с принципами написания гарантирует качество при обновлении. Трёхуровневая адресная модель: brief (понимание) → roadmap (навигация) → index (/context CODE — детали).
+1. **Project Model (CLAUDE.md brief)** — the "Project Model" section in CLAUDE.md gives a new agent a working mental model in a single read. An HTML comment with writing principles ensures quality during updates. Three-level addressing model: brief (understanding) → roadmap (navigation) → index (/context CODE — details).
 
-2. **Решения (decisions/)** — каждое решение записывается в отдельный файл с обоснованием, зависимостями и условиями пересмотра. Двухуровневые индексы: hub `_index.md` (таблица доменов) + доменные `{domain}/_index.md` (детальный скелет). Команда `/context CODE` строит карту зависимостей.
+2. **Decisions (decisions/)** — each decision is recorded in a separate file with rationale, dependencies, and review conditions. Two-level indexes: hub `_index.md` (domain table) + domain `{domain}/_index.md` (detailed skeleton). The `/context CODE` command builds a dependency map.
 
-3. **Стек задач (roadmap.md)** + **Сессионный контекст (sessions.md)** — задачи с глубиной вложенности в roadmap. Сессионный лог в отдельном файле. В конце сессии Claude записывает WARM-резидуал в sessions.md — что сделано, что важного осталось, ключевые слова для поиска. Sessions.md — архив с глубиной: при недопонимании агент может нырнуть в ранние блоки. Следующая сессия начинает не с нуля.
+3. **Task Stack (roadmap.md)** + **Session Context (sessions.md)** — tasks with nesting depth in roadmap. Session log in a separate file. At the end of a session Claude writes the WARM residual to sessions.md — what was done, what's important, keywords for search. Sessions.md is an archive with depth: when there's a misunderstanding, the agent can dive into earlier blocks. The next session doesn't start from zero.
 
-4. **Исследования (docs/)** — провёл ресёрч → файл. В следующий раз Claude прочитает файл, а не будет отвечать по памяти.
+4. **Research (docs/)** — did research → file. Next time Claude reads the file instead of answering from memory.
 
-5. **Управление вниманием (FAR)** — Claude периодически сортирует контекст на HOT (нужно сейчас, max 3-5) / WARM (пригодится, тезисно) / COLD (мусор, забыть). Команда `/far` запускает вручную.
+5. **Attention Management (FAR)** — Claude periodically sorts context into HOT (needed now, max 3-5) / WARM (might be useful, bullet points) / COLD (garbage, forget). The `/far` command triggers it manually.
 
-6. **Хуки** — 7 хуков: pre-commit (секретарский чеклист), session-start (восстановление контекста), session-end (автозахват черновиков), pre/post-compact (handoff при компрессии), rebuild-index (аварийное восстановление), lint-refs (валидация ссылок и контрактов).
+6. **Hooks** — 7 hooks: pre-commit (secretary checklist), session-start (context recovery), session-end (auto-capture drafts), pre/post-compact (handoff during compression), rebuild-index (emergency recovery), lint-refs (link and contract validation).
 
-### Ключевые принципы
+### Key principles
 
-- **Git — единственная система версий.** Нет _archive/. Нужна старая версия → `git log`.
-- **Ленивая загрузка.** При старте — только индексы. Файлы — по ссылкам, когда нужны.
-- **Каждое решение — сразу.** Решили → файл → индекс. Не "потом запишу".
-- **HOT компактен.** Больше 5 вещей в фокусе — внимание размывается.
+- **Git is the only version system.** No _archive/. Need an old version → `git log`.
+- **Lazy loading.** At startup — only indexes. Files — via links, when needed.
+- **Every decision — immediately.** Decided → file → index. Not "I'll record it later."
+- **HOT is compact.** More than 5 things in focus — attention dilutes.
 
 ### FAQ
 
-**Нужен ли Claude Code Pro/Max?** Нет. Работает с любым тарифом.
+**Do I need Claude Code Pro/Max?** No. Works with any plan.
 
-**Проект уже идёт, решения не документировались?** Запусти `/knowledge-archaeology` — Claude пройдёт по истории сессий и git, найдёт решения и сгенерирует ADR-файлы.
+**Project is already underway, decisions weren't documented?** Run `/knowledge-archaeology` — Claude will go through session history and git, find decisions and generate ADR files.
 
-**Можно ли без агентов?** Да. `agents/AGENT_PROTOCOL.md` опционален.
+**Can I skip agents?** Yes. `agents/AGENT_PROTOCOL.md` is optional.
 
-**Работает с другими LLM?** Хуки специфичны для Claude Code. Файловая структура — универсальна.
+**Works with other LLMs?** Hooks are specific to Claude Code. The file structure is universal.
 
 ---
 
-## GraphRAG — семантический поиск + граф знаний (опционально)
+## GraphRAG — semantic search + knowledge graph (optional)
 
-При росте проекта навигация по индексам может не находить неявные связи. GraphRAG добавляет:
+As a project grows, index-based navigation may miss implicit connections. GraphRAG adds:
 
-- **Поиск по смыслу** — "как мы решали проблему с контекстом" находит FAR-протокол, даже если слово "FAR" не в запросе
-- **Граф знаний** — автоматически обнаруживает связи между решениями
-- **Комбинированный поиск** — ищет одновременно по смыслу и по графу связей
+- **Semantic search** — "how did we solve the context problem" finds the FAR protocol, even if the word "FAR" isn't in the query
+- **Knowledge graph** — automatically discovers connections between decisions
+- **Combined search** — searches simultaneously by meaning and by graph connections
 
-### Установка
+### Installation
 
-В Claude Code в папке проекта:
+In Claude Code in the project folder:
 
 ```
 /graphrag init
 ```
 
-Claude установит зависимости, спросит OpenRouter API key (бесплатно) и проиндексирует существующие файлы.
+Claude will install dependencies, ask for an OpenRouter API key (free) and index existing files.
 
-### Использование
+### Usage
 
-- `/search <запрос>` — поиск по смыслу в графе знаний
-- `/graphrag extract --changed` — извлечь тройки из изменённых файлов (автоматически при коммите)
-- `/graphrag reindex` — пересоздать граф с нуля
+- `/search <query>` — semantic search in the knowledge graph
+- `/graphrag extract --changed` — extract triples from changed files (automatic on commit)
+- `/graphrag reindex` — rebuild the graph from scratch
 
-### Стоимость
+### Cost
 
-- Embedding-модель: локально, бесплатно
-- OpenRouter (обслуживание графа): бесплатно (Gemma 3) или ~$0.05/мес
-- VPS не нужен — всё работает на твоём компьютере
+- Embedding model: local, free
+- OpenRouter (graph maintenance): free (Gemma 3) or ~$0.05/month
+- No VPS needed — everything runs on your computer
