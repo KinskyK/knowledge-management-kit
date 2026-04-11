@@ -41,8 +41,8 @@ fi
 # --- Check 3: Load last session context ---
 SESSIONS="meta/sessions.md"
 if [ -f "$SESSIONS" ]; then
-  SESSION_COUNT=$(grep -c "^### Сессия" "$SESSIONS" 2>/dev/null || echo "0")
-  LAST_SESSION=$(grep -n "^### Сессия" "$SESSIONS" | tail -1 | cut -d: -f1)
+  SESSION_COUNT=$(grep -c "^### Session" "$SESSIONS" 2>/dev/null || echo "0")
+  LAST_SESSION=$(grep -n "^### Session" "$SESSIONS" | tail -1 | cut -d: -f1)
   if [ -n "$LAST_SESSION" ]; then
     OUTPUT="${OUTPUT}\n📋 Last session context (sessions.md):\n"
     OUTPUT="${OUTPUT}$(tail -n +$LAST_SESSION "$SESSIONS" | head -20)\n"

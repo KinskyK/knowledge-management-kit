@@ -121,7 +121,7 @@ if [ "$HAS_DECISIONS" = true ]; then
     esac
     CODE=$(head -1 "$f" | sed 's/^# \([^ ]*\).*/\1/')
     if [ -n "$CODE" ]; then
-      if grep -q "^- \*\*Статус\*\*:.*draft" "$f" 2>/dev/null; then
+      if grep -q "^- \*\*Status\*\*:.*draft" "$f" 2>/dev/null; then
         continue
       fi
       DOMAIN_DIR=$(dirname "$f")
@@ -164,16 +164,16 @@ if [ "$HAS_SESSIONS" = true ] && [ -f "meta/sessions.md" ]; then
   while IFS= read -r line_num; do
     LINE1=$(sed -n "$((line_num + 1))p" "meta/sessions.md")
     LINE2=$(sed -n "$((line_num + 2))p" "meta/sessions.md")
-    if ! echo "$LINE1" | grep -q "^Темы:" && ! echo "$LINE2" | grep -q "^Темы:"; then
-      MISSING_TOPICS="${MISSING_TOPICS}\n  - line ${line_num}: block without 'Темы:' line"
+    if ! echo "$LINE1" | grep -q "^Topics:" && ! echo "$LINE2" | grep -q "^Topics:"; then
+      MISSING_TOPICS="${MISSING_TOPICS}\n  - line ${line_num}: block without 'Topics:' line"
     fi
-  done < <(grep -n "^### Сессия" "meta/sessions.md" | cut -d: -f1)
+  done < <(grep -n "^### Session" "meta/sessions.md" | cut -d: -f1)
   if [ -n "$MISSING_TOPICS" ]; then
-    WARNINGS="${WARNINGS}\n⚠ sessions.md: blocks without keywords ('Темы:' line after heading):${MISSING_TOPICS}"
+    WARNINGS="${WARNINGS}\n⚠ sessions.md: blocks without keywords ('Topics:' line after heading):${MISSING_TOPICS}"
   fi
 fi
 
-# Validate ADR content: check for Отвергнуто section in changed files
+# Validate ADR content: check for Rejected section in changed files
 if [ "$HAS_DECISIONS" = true ]; then
   MISSING_REJECTED=""
   for f in $CHANGED; do
@@ -181,7 +181,7 @@ if [ "$HAS_DECISIONS" = true ]; then
       meta/decisions/*/*.md)
         bn=$(basename "$f")
         case "$bn" in _index.md|_tags.md) continue ;; esac
-        if [ -f "$f" ] && ! grep -q "Отвергнуто" "$f" 2>/dev/null; then
+        if [ -f "$f" ] && ! grep -q "Rejected" "$f" 2>/dev/null; then
           MISSING_REJECTED="${MISSING_REJECTED}\n  - $f"
         fi
         ;;

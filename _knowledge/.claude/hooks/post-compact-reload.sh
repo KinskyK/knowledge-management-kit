@@ -34,9 +34,9 @@ except Exception:
     }))
     sys.exit(0)
 
-# Extract task stack (between "## Стек задач" and "## Сессионный контекст")
+# Extract task stack (between "## Task Stack" and "## Session Context")
 task_stack = ""
-match = re.search(r'## Стек задач\n(.*?)(?=## Сессионный контекст)', content, re.DOTALL)
+match = re.search(r'## Task Stack\n(.*?)(?=## Session Context)', content, re.DOTALL)
 if match:
     task_stack = match.group(1).strip()
 
@@ -46,7 +46,7 @@ if sessions_path:
     try:
         with open(sessions_path, 'r', encoding='utf-8') as f:
             sessions_content = f.read()
-        sessions_blocks = [b for b in re.split(r'(?=^### Сессия )', sessions_content, flags=re.MULTILINE) if b.startswith('### Сессия ')]
+        sessions_blocks = [b for b in re.split(r'(?=^### Session )', sessions_content, flags=re.MULTILINE) if b.startswith('### Session ')]
         if sessions_blocks:
             latest_session = sessions_blocks[-1].strip()
             if len(sessions_blocks) > 1:

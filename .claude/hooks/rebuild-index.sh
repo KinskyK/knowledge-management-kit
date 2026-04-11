@@ -5,7 +5,7 @@
 #   1. Domain _index.md from ADR files (decisions) / doc files (docs)
 #   2. Hub _index.md from domain indexes
 #
-# ADR contract: line 1 = "# CODE — title", line 3 = "#tags", last ^- **Статус**:^ = status
+# ADR contract: line 1 = "# CODE — title", line 3 = "#tags", last ^- **Status**:^ = status
 # Docs contract: line 1 = "# title", tags = first line starting with #tag
 #
 # Entry summaries are NOT restored — a placeholder is used.
@@ -74,7 +74,7 @@ for domain_dir in "$DECISIONS_DIR"/*/; do
     TITLE_LINE=$(head -1 "$f")
     TITLE="${TITLE_LINE#\# }"
     TAGS=$(sed -n '3p' "$f")
-    STATUS=$(grep "^- \*\*Статус\*\*:" "$f" 2>/dev/null | tail -1 | sed 's/^- \*\*Статус\*\*: //')
+    STATUS=$(grep "^- \*\*Status\*\*:" "$f" 2>/dev/null | tail -1 | sed 's/^- \*\*Status\*\*: //')
 
     # Skip drafts
     if echo "$STATUS" | grep -q "draft"; then
@@ -216,9 +216,9 @@ for topic_dir in "$DOCS_DIR"/*/; do
     # Find links
     DOC_LINKS=$(grep "^→ " "$f" 2>/dev/null | head -1 || echo "")
     # Find date
-    DOC_DATE=$(grep -m1 "^Дата:" "$f" 2>/dev/null | sed 's/^Дата: //' || echo "")
+    DOC_DATE=$(grep -m1 "^Date:" "$f" 2>/dev/null | sed 's/^Date: //' || echo "")
     if [ -z "$DOC_DATE" ]; then
-      DOC_DATE=$(grep -m1 "^Создано:" "$f" 2>/dev/null | sed 's/^Создано: //' || echo "")
+      DOC_DATE=$(grep -m1 "^Created:" "$f" 2>/dev/null | sed 's/^Created: //' || echo "")
     fi
 
     DOC_COUNT=$((DOC_COUNT + 1))

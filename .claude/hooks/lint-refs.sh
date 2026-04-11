@@ -85,8 +85,8 @@ for f in meta/decisions/*/*.md; do
     error "$bn: line 3 does not contain tags"
   fi
 
-  # Has Статус field
-  if ! grep -q 'Статус' "$f" 2>/dev/null; then
+  # Has Status field
+  if ! grep -q 'Status' "$f" 2>/dev/null; then
     warn "$bn: missing Status field"
   fi
 done
@@ -105,7 +105,7 @@ for f in meta/decisions/*/*.md; do
 
   code=$(head -1 "$f" | sed 's/^# \([^ ]*\).*/\1/')
   [ -z "$code" ] && continue
-  grep -q "Статус.*draft" "$f" 2>/dev/null && continue
+  grep -q "Status.*draft" "$f" 2>/dev/null && continue
 
   domain_dir=$(dirname "$f")
   domain_index="$domain_dir/_index.md"
@@ -206,7 +206,7 @@ for f in meta/decisions/*/*.md; do
   [ -z "$CODE" ] && continue
 
   # Skip drafts
-  grep -q "Статус.*draft" "$f" 2>/dev/null && continue
+  grep -q "Status.*draft" "$f" 2>/dev/null && continue
 
   # Check if this CODE is referenced by any OTHER ADR file
   HAS_INCOMING=false
