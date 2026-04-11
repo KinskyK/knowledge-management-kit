@@ -21,7 +21,7 @@ Claude Code теряет контекст между сессиями. claude-me
 **Ключевые механизмы:**
 - FAR (Full Attention Residuals) — проактивная сортировка контекста на HOT/WARM/COLD. Спецификация: `Full Attention Residuals.md`.
 - Секретарский протокол — pre-commit чеклист: FAR-аудит, незаписанные решения, обновление индексов.
-- Хуки: pre-commit, session-start, pre/post-compact, rebuild-index, lint-refs.
+- Хуки: pre-commit, session-start, session-end, pre/post-compact, rebuild-index, lint-refs.
 - context.py — парсер графа зависимостей решений (forward/reverse/tag search).
 
 **Формат поставки.** Папка `_knowledge/` копируется в целевой проект. INTEGRATION.md — скрипт для Claude: интервью → генерация файлов → адаптация под проект → удаление `_knowledge/`.
