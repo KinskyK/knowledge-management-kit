@@ -6,3 +6,6 @@
 graphrag_mcp/.venv/
 graphrag_mcp/__pycache__/
 graphrag_mcp/tests/__pycache__/
+
+# Auto-capture drafts (transient, processed at commit)
+meta/drafts/*.md
