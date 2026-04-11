@@ -1,394 +1,394 @@
-# Как появилась эта система
+# How this system came to be
 
-Эта карта рассказывает историю Knowledge Management Kit — не как набор компонентов, а как цепочку проблем и решений. Каждая конструкция родилась из конкретной боли. Порядок рассказа — порядок, в котором проблемы возникали.
-
----
-
-## Отправная точка: размывание контекста
-
-Всё началось с простого наблюдения: в длинной сессии с Claude информация размывается. Что-то теряется, что-то искажается. Чем длиннее разговор, тем хуже Claude держит нить.
-
-Я с самого начала проводил аналогии с тем, как работают люди. Команда обсуждает проблему — накапливается шум, люди путаются, перескакивают. Тогда фасилитатор останавливает беседу и делает срез: что у нас на повестке, где мы сейчас, какие решения уже достигнуты. А невидимая часть его работы — выкинуть из обсуждения всё, что уже потеряло значимость.
-
-Мне нужен был такой фасилитатор для сессии с Claude.
-
-### FAR — фасилитатор сессии
-
-Так появился FAR (Full Attention Residuals). Изначально это был простой ручной цикл: я запускал команду `/far`, Claude пересматривал весь контекст и сортировал его на три слоя:
-
-- **HOT** — то, что нужно прямо сейчас (текущая задача, открытые вопросы, ближайшие шаги). Максимум 3-5 пунктов — больше и внимание размывается.
-- **WARM** — отработано, но ценно (принятые решения, результаты, инсайты). Сжимается до тезисов.
-- **COLD** — мусор (промежуточные шаги, тупиковые ветки, обработанные логи). Безопасно забыть.
-
-Плюс секция **Горизонт** — предвосхищение: что, вероятно, понадобится на следующем шаге. Это ключевое отличие от простого резюме: FAR смотрит не только назад, но и вперёд.
-
-После аудита я давал команду `clear`, чистил сессию, а потом загружал сжатый контекст обратно. Claude продолжал работу с чистым, отфильтрованным контекстом вместо каши из сотни сообщений.
-
-Принцип оценки здесь важный: **значимость контекста не абсолютна, а контекстуальна**. Одна и та же информация может быть HOT при отладке и COLD при рефакторинге. И объём обсуждения — не признак значимости. Если на тупиковую ветку потрачено десять реплик, это не делает её важной.
-
-Триггеры аудита: смена фазы работы, закрытие крупной подзадачи, 8-12 обменов без аудита, изменение направления. Или вручную — `/far`.
-
-> Файлы: `Full Attention Residuals.md` (спецификация), `.claude/commands/far.md` (команда)
+This map tells the story of Knowledge Management Kit — not as a set of components, but as a chain of problems and solutions. Every construct was born from a specific pain point. The order of the narrative follows the order in which the problems arose.
 
 ---
 
-## Проблема вторая: потеря между сессиями
+## Starting point: context dilution
 
-FAR решал проблему внутри сессии. Но после сессии оставались только итоги фасилитации — WARM-резидуал. Они пригодны для продолжения локальной задачи. Но проект больше одной задачи. В разных сессиях обсуждаются разные вопросы. И WARM одной сессии может быть непригоден для другой.
+It all started with a simple observation: in a long session with Claude, information gets diluted. Something gets lost, something gets distorted. The longer the conversation, the worse Claude holds the thread.
 
-Нужен был уровень общей базы знаний — место, где хранится всё, что является продуктом всех прошлых сессий. Не логи (в них много отработанного материала), а консолидированный итог.
+From the very beginning, I drew analogies with how people work. A team discusses a problem — noise accumulates, people get confused, they jump between topics. Then a facilitator stops the conversation and takes a snapshot: what's on the agenda, where are we now, what decisions have already been reached. And the invisible part of their work is discarding everything that has already lost relevance from the discussion.
 
-### Секретарь и решения
+I needed such a facilitator for a session with Claude.
 
-Я представил себе секретаря, который тщательно собирает итоги каждой сессии. Но по каким принципам он должен отбирать материал?
+### FAR — session facilitator
 
-Гипотеза, к которой мы пришли: важны четыре вещи:
-1. **Проблематика** — что потребовало решения и почему
-2. **Само решение** — что именно решили
-3. **Обоснование** — почему приняли такое решение
-4. **Отвергнутые альтернативы** — что не выбрали и почему
+That's how FAR (Full Attention Residuals) came about. Initially it was a simple manual cycle: I ran the `/far` command, Claude reviewed the entire context and sorted it into three layers:
 
-Это, по сути, формат ADR (Architecture Decision Record) — методология, придуманная Michael Nygard в 2011 году для документирования архитектурных решений. Классический ADR выглядит так: номер, контекст, решение, последствия. Просто и эффективно для команд разработчиков.
+- **HOT** — what is needed right now (current task, open questions, next steps). Maximum 3-5 items — more and attention gets diluted.
+- **WARM** — processed but valuable (accepted decisions, results, insights). Compressed to bullet points.
+- **COLD** — noise (intermediate steps, dead-end branches, processed logs). Safe to forget.
 
-Но классический ADR спроектирован для людей, которые помнят контекст и читают файлы глазами. Наша система — для AI, который не помнит ничего и парсит файлы программно. Поэтому мы адаптировали формат:
+Plus a **Horizon** section — anticipation: what will likely be needed at the next step. This is the key difference from a simple summary: FAR looks not only backward but also forward.
 
-- **Доменные коды вместо последовательной нумерации.** NPC-04 сразу говорит "четвёртое решение про NPC". ADR-0042 не говорит ничего без чтения файла.
-- **Редактируемость вместо неизменяемости.** Классический ADR неизменяем — если решение пересмотрено, пишется новый ADR со статусом "supersedes". У нас файл редактируется на месте, с секцией "Эволюция vN→vN+1", а git хранит историю.
-- **Три уровня уверенности** вместо proposed/accepted/deprecated: **аксиома** (■) — фундамент, не трогаем; **правило** (◆) — рабочее решение, можно менять с обоснованием; **гипотеза** (●) — проверяем, можно менять свободно. Без этих маркеров Claude не различает стоимость изменения — он может предложить "переделаем всю архитектуру" так же легко, как "поменяем число с 0.20 на 0.18".
-- **Явные связи** — `[[NPC-05]]` ссылки между решениями, которые парсятся скриптами.
-- **Машиночитаемый контракт** — строка 1 всегда `# CODE — название`, строка 3 — теги. Это позволяет скриптам парсить файлы автоматически.
-- **"Пересмотреть если"** — встроенный триггер. Автор решения в момент принятия записывает условие, при котором его стоит пересмотреть. Решение принимается в конкретном контексте — контекст меняется, но кто вспомнит, что решение пора пересмотреть? Триггер вспомнит.
-- **"Отвергнуто"** — рекомендуемая (не опциональная) секция. Какие альтернативы рассматривались и почему отброшены. Это глубокий слой информации: когда агент позже будет пересматривать решение, эта секция предотвратит предложение уже отвергнутых вариантов. Без неё ADR хранит победителя, но не проигравших — и агент может годами предлагать одно и то же "улучшение", не зная что оно уже было рассмотрено и отброшено.
+After the audit I ran `clear`, wiped the session, then loaded the compressed context back. Claude continued working with clean, filtered context instead of a mess of hundreds of messages.
 
-### Почему один файл — одно решение
+The evaluation principle here is important: **context significance is not absolute but contextual**. The same information can be HOT during debugging and COLD during refactoring. And the volume of discussion is not an indicator of significance. If ten exchanges were spent on a dead-end branch, that doesn't make it important.
 
-Это был осознанный выбор из трёх вариантов:
+Audit triggers: phase change, closing a major subtask, 8-12 exchanges without an audit, change of direction. Or manually — `/far`.
 
-**Один большой файл** — все решения в одном документе. Просто. Но при 50+ решениях нечитаем, git diff шумный (изменил одно решение — diff в 300-строчном файле), невозможен lazy loading (Claude грузит всё или ничего), merge-конфликты при параллельной работе.
-
-**База данных** (SQLite, JSON) — машиночитаемо, структурировано. Но Claude не может "прочитать" базу как текст, нет удобного diff в git, нет рендеринга на GitHub, нужны специальные инструменты.
-
-**Один файл = одно решение** — паттерн Zettelkasten / Obsidian. Атомарные markdown-заметки, соединённые ссылками в граф. Этот вариант победил:
-
-- Git-дружелюбие — каждое решение это отдельный diff, отдельная история
-- LLM-дружелюбие — Claude загружает один файл (~500 токенов) вместо всех 56 (~15K). Это основа lazy loading
-- Человекочитаемость — markdown в любом редакторе, GitHub рендерит, Obsidian может открыть как vault и показать граф связей
-- Связываемость — `[[NPC-04]]` в любом файле создаёт ссылку, из которых складывается граф знаний
-- Масштабируемость — 10 файлов работает, 100 файлов работает, 500 будет работать
-
-Obsidian-аналогия точна: Obsidian — инструмент для людей, построенный на принципе "атомарные заметки + ссылки = граф знаний". Наша система — то же самое, но для AI.
-
-> Файлы: `meta/decisions/{domain}/{CODE}.md` (ADR-файлы), `agents/AGENT_PROTOCOL.md` (протокол фиксации)
+> Files: `Full Attention Residuals.md` (specification), `.claude/commands/far.md` (command)
 
 ---
 
-## Проблема третья: хранение — ещё не навигация
+## Problem two: loss between sessions
 
-Секретарь записывает решения. Но как в них ориентироваться? Если файлов 5, Claude может прочитать все. Если 50 — чтение всех файлов забьёт контекст и создаст тот самый шум, от которого мы боролись. Нужен каталог.
+FAR solved the problem within a session. But after a session, only the facilitation results remained — the WARM residual. They are suitable for continuing a local task. But a project is bigger than one task. Different questions are discussed in different sessions. And the WARM from one session may be unsuitable for another.
 
-### Индексы — адресная система
+A general knowledge base level was needed — a place that stores everything that is the product of all past sessions. Not logs (they contain a lot of processed material), but a consolidated result.
 
-Появился слой навигации — индексно-адресная система. Новый Claude в новой сессии оказывался чем-то вроде библиотекаря в библиотеке: множество книг, а на рабочем столе лежит каталог, в котором можно найти любую.
+### The secretary and decisions
 
-Двухуровневая структура:
-- **Hub** `_index.md` — таблица доменов: сколько решений, какого типа, какие триггеры пересмотра
-- **Доменные индексы** `{domain}/_index.md` — скелет всех записей домена с тегами, связями и кратким описанием
+I imagined a secretary who meticulously collects the results of each session. But by what principles should they select the material?
 
-Ленивая загрузка: при старте Claude читает только hub. Доменные индексы — когда задача касается конкретного домена. Сами файлы решений — по ссылкам из индекса. Три уровня глубины, каждый подгружается только когда нужен.
+The hypothesis we arrived at: four things matter:
+1. **The problem** — what required a decision and why
+2. **The decision itself** — what exactly was decided
+3. **The rationale** — why this decision was made
+4. **Rejected alternatives** — what was not chosen and why
 
-### Roadmap — стек незакрытых вопросов
+This is essentially the ADR (Architecture Decision Record) format — a methodology invented by Michael Nygard in 2011 for documenting architectural decisions. A classic ADR looks like: number, context, decision, consequences. Simple and effective for development teams.
 
-Ещё одна проблема: как понять, что мы уже закрыли, что ещё в работе, а к чему даже не притрагивались? Когда в рамках сессии живая хаотичная работа прыгает с одной темы на другую, агент должен иметь возможность вернуться к стеку вопросов и восстановить приоритеты.
+But the classic ADR was designed for humans who remember context and read files with their eyes. Our system is for an AI that remembers nothing and parses files programmatically. So we adapted the format:
 
-Roadmap задействовал систему адресов из индексов и размечал вопросы по статусам: не начат, в работе, завершён. С глубинами вложенности — подзадачи внутри задач.
+- **Domain codes instead of sequential numbering.** NPC-04 immediately says "fourth decision about NPCs". ADR-0042 says nothing without reading the file.
+- **Editability instead of immutability.** A classic ADR is immutable — if a decision is revised, a new ADR is written with a "supersedes" status. In our system, the file is edited in place, with an "Evolution vN→vN+1" section, and git keeps the history.
+- **Three confidence levels** instead of proposed/accepted/deprecated: **axiom** (■) — foundation, don't touch; **rule** (◆) — working decision, can be changed with justification; **hypothesis** (●) — being tested, can be changed freely. Without these markers, Claude doesn't distinguish the cost of change — it can suggest "let's redo the entire architecture" just as easily as "let's change the number from 0.20 to 0.18".
+- **Explicit links** — `[[NPC-05]]` references between decisions that are parsed by scripts.
+- **Machine-readable contract** — line 1 is always `# CODE — name`, line 3 — tags. This allows scripts to parse files automatically.
+- **"Reconsider if"** — a built-in trigger. The decision author records at the time of adoption the condition under which it should be reconsidered. A decision is made in a specific context — the context changes, but who will remember that it's time to revisit the decision? The trigger will.
+- **"Rejected"** — a recommended (not optional) section. What alternatives were considered and why they were discarded. This is a deep layer of information: when the agent later revisits the decision, this section will prevent proposing already-rejected options. Without it, the ADR stores the winner but not the losers — and the agent can spend years proposing the same "improvement" without knowing it was already considered and rejected.
 
-### Sessions — отделение потока от структуры
+### Why one file — one decision
 
-Изначально сессионный контекст жил внутри roadmap. Но возникли три проблемы:
+This was a deliberate choice among three options:
 
-**Recency bias.** Сессионные блоки копились внизу файла. Claude читал файл, и свежие сессионные заметки (последнее прочитанное) перетягивали внимание с задач. Задачи терялись.
+**One large file** — all decisions in one document. Simple. But with 50+ decisions it's unreadable, git diff is noisy (changed one decision — diff in a 300-line file), lazy loading is impossible (Claude loads everything or nothing), merge conflicts during parallel work.
 
-**Разная частота обновления.** Задачи меняются раз в несколько сессий. Сессионный лог — каждую сессию. Смешивать стабильное с потоковым — путь к файлу, который растёт бесконтрольно.
+**Database** (SQLite, JSON) — machine-readable, structured. But Claude can't "read" a database as text, no convenient diff in git, no rendering on GitHub, requires special tools.
 
-**Разные читатели.** Задачи нужны для "что делать". Сессионный блок — для "чем закончили вчера". Хук session-start загружает только последний блок — ему задачи не нужны.
+**One file = one decision** — the Zettelkasten / Obsidian pattern. Atomic markdown notes connected by links into a graph. This option won:
 
-Отделили. Roadmap хранит задачи. Sessions хранит сессионный контекст — каждая сессия добавляет свой блок. Старые блоки просматриваются, поглощённое убирается. Git history хранит удалённое.
+- Git-friendly — each decision is a separate diff, a separate history
+- LLM-friendly — Claude loads one file (~500 tokens) instead of all 56 (~15K). This is the basis of lazy loading
+- Human-readable — markdown in any editor, GitHub renders it, Obsidian can open it as a vault and show the link graph
+- Linkable — `[[NPC-04]]` in any file creates a reference, from which a knowledge graph emerges
+- Scalable — 10 files works, 100 files works, 500 will work
 
-Сессионный лог — единственное место, где живёт процесс. Решения хранят результат ("решили X потому что Y"), но не хранят путь к нему ("три часа обсуждали X vs Z, ключевой инсайт был W"). У лога три функции:
+The Obsidian analogy is precise: Obsidian is a tool for humans built on the principle "atomic notes + links = knowledge graph". Our system is the same thing, but for AI.
 
-**Краткосрочная (1-2 сессии):** WARM-резидуал. "Вчера остановились на калибровке, выход готов, анализ ещё не проведён." Следующая сессия начинает не с нуля. Без этого первые 15 минут каждой сессии уходят на "а где мы были?"
-
-**Среднесрочная (3-10 сессий):** контекст решений. Если через неделю возникает вопрос "почему мы отвергли вариант Z?" — ответ может быть в сессионном блоке, а не в ADR (потому что в ADR записали только победителя, не все обсуждения).
-
-**Deep dive.** Но у этого архива была проблема: агент не знал, что может им пользоваться. Хук session-start показывал только последний блок. Более ранние блоки существовали в файле, но агент не знал, что туда можно нырнуть за контекстом. Это как иметь архив протоколов встреч, но никому не сказать, что он существует.
-
-Решение: каждый сессионный блок теперь имеет строку `Темы:` с ключевыми словами. Хук session-start при наличии нескольких блоков явно подсказывает: "есть ещё N блоков, при недопонимании — читай ранние". В правилах CLAUDE.md записано: sessions.md — архив с глубиной, не ограничивайся последним блоком.
-
-Долгосрочной функции нет — старые блоки поглощаются решениями и docs. Поглощённое убирается. Git history хранит удалённое.
-
-### Триггеры deep dive — когда нырять глубже
-
-Глубокий слой (секция "Отвергнуто" в ADR + старые блоки sessions.md) — ценный ресурс. Но обращаться к нему по каждому поводу — расход токенов на шум. Нужен баланс: не нырять без причины, но и не упускать момент, когда глубина необходима.
-
-Решение — поведенческий протокол, по той же модели что FAR. Не автоматический скрипт, а набор триггеров:
-
-- **Пересмотр решения.** Собираешься изменить существующее решение → обрати внимание на секцию "Отвергнуто" в ADR-файле. Файл уже прочитан — но "прочитал" и "обратил внимание" не одно и то же для языковой модели. Триггер переключает фрейм чтения: та же информация, но с вопросом "что уже пробовали и почему не подошло" вместо "что мы решили".
-- **Конфликт между решениями.** Новое предложение противоречит существующему → ищи контекст в sessions.md. Возможно, старое решение было принято при других условиях.
-- **Вопрос "почему".** Пользователь спрашивает "почему не X" или "зачем именно так" → ответ может быть в сессионном блоке, а не в ADR (в ADR записан победитель, не все обсуждения).
-- **Повторная тема.** Пользователь повторно поднимает тему, которая уже звучала раньше → проверь заголовки блоков sessions.md, прежде чем нырять в тела. Если заголовок совпадает — читай тело блока за контекстом.
-
-Это тот же принцип, что в FAR: значимость контекста контекстуальна. Секция "Отвергнуто" может быть COLD при обычной работе и HOT при пересмотре решения. Триггер переключает контекст значимости.
-
-> Файлы: `meta/decisions/_index.md` (hub), `meta/decisions/{domain}/_index.md` (доменные), `meta/docs/_index.md` (hub исследований), `meta/roadmap.md`, `meta/sessions.md`
+> Files: `meta/decisions/{domain}/{CODE}.md` (ADR files), `agents/AGENT_PROTOCOL.md` (recording protocol)
 
 ---
 
-## Проблема четвёртая: каталог без смысла
+## Problem three: storage is not yet navigation
 
-Теперь у Claude есть библиотека с каталогом. Он может найти любую "книгу". Но он не понимает ни смысла этих книг, ни о чём они, ни для чего они ему. Каталог — система адресов, не карта смыслов. Новый агент в новой сессии видит индексы как бессмысленную таблицу: вот домены, вот счётчики, вот коды. И что?
+The secretary records decisions. But how to navigate them? If there are 5 files, Claude can read them all. If 50 — reading all files will flood the context and create the very noise we were fighting against. A catalog was needed.
 
-### Brief — онбординг в пространство смыслов
+### Indexes — an address system
 
-Так появился brief — секция "Модель проекта" в CLAUDE.md. Это не описание системы. Это письмо новому агенту: вот что за проект, зачем он существует, как устроен, какие механизмы ключевые, какие ограничения. Бюджет — до 120 содержательных строк. Одно прочтение — и у агента есть рабочая ментальная модель.
+A navigation layer appeared — an index-address system. A new Claude in a new session was something like a librarian in a library: many books, and on the desk lies a catalog where any one can be found.
 
-Но brief сам по себе не связывался с каталогом. Агент прочитал письмо, понял проект — а потом открывал индекс и снова не понимал, как от понимания перейти к навигации.
+Two-level structure:
+- **Hub** `_index.md` — a domain table: how many decisions, what type, what reconsideration triggers
+- **Domain indexes** `{domain}/_index.md` — a skeleton of all domain entries with tags, links, and brief descriptions
 
-Решением стала связка: brief ссылается на доменные адреса прямо в тексте, а индексы озаглавлены описательно — наполнены смыслом, не только кодами. Агент читает brief, видит "домен core — архитектура системы" со ссылкой на `meta/decisions/core/_index.md`, понимает и что там, и зачем ему туда.
+Lazy loading: at startup Claude reads only the hub. Domain indexes — when the task concerns a specific domain. The actual decision files — via links from the index. Three levels of depth, each loaded only when needed.
 
-Трёхуровневая адресная модель:
-1. **Brief** — понимание (что это, зачем, как устроено)
-2. **Hub + roadmap** — навигация (куда идти, что в работе)
-3. **Доменный индекс + /context** — детали (конкретные решения и их связи)
+### Roadmap — stack of open questions
 
-> Файлы: `CLAUDE.md` (секция "Модель проекта" + секция "Инициализация")
+Another problem: how to tell what we've already closed, what's still in progress, and what we haven't even touched? When chaotic live work within a session jumps from one topic to another, the agent must be able to return to the stack of questions and restore priorities.
 
----
+The roadmap leveraged the address system from indexes and tagged questions by status: not started, in progress, completed. With nesting depths — subtasks within tasks.
 
-## Проблема пятая: дисциплина
+### Sessions — separating flow from structure
 
-Всё описанное выше — протоколы. FAR, секретарь, обновление индексов, запись решений. Но протоколы работают только если их соблюдать. Claude — языковая модель. Он не будет проактивно проверять индексы перед коммитом, не вспомнит про FAR-аудит после двенадцати обменов, не запишет WARM перед компрессией контекста. Система зависит от дисциплины, которую легко нарушить.
+Initially, session context lived inside the roadmap. But three problems emerged:
 
-### Хуки — автоматические напоминания
+**Recency bias.** Session blocks accumulated at the bottom of the file. Claude read the file, and fresh session notes (last thing read) pulled attention away from tasks. Tasks got lost.
 
-Хуки Claude Code привязываются к событиям жизненного цикла. Они не выполняют работу за Claude — они напоминают и проверяют. Семь хуков, каждый решает конкретную проблему:
+**Different update frequencies.** Tasks change once every few sessions. The session log — every session. Mixing the stable with the streaming is a path to a file that grows uncontrollably.
 
-**pre-commit-secretary** — срабатывает перед каждым git commit. Показывает секретарский чеклист (пункты 0-8): провёл ли FAR-аудит, есть ли незаписанные решения, обновлены ли индексы, обновлён ли roadmap. Проверяет orphan-файлы — решения, которые существуют как файлы, но отсутствуют в индексе. Claude видит напоминание и исправляет пропущенное до коммита.
+**Different readers.** Tasks are needed for "what to do". The session block — for "where we left off yesterday". The session-start hook loads only the latest block — it doesn't need tasks.
 
-**session-start-recovery** — срабатывает при старте сессии. Проверяет четыре вещи: есть ли незакоммиченные изменения от предыдущей сессии (если есть — предупреждает), насколько свежий roadmap (если больше 48 часов — рекомендует /far), загружает последний блок из sessions.md, показывает необработанные черновики из meta/drafts/ (с предупреждением если старше 7 дней). Новая сессия начинает с контекста, а не с нуля.
+We separated them. The roadmap stores tasks. Sessions stores session context — each session adds its own block. Old blocks are reviewed, absorbed content is removed. Git history stores what was deleted.
 
-**pre-compact-handoff** — срабатывает перед компрессией контекста. Это критический момент: Claude Code автоматически сжимает историю при переполнении контекстного окна. Всё что было "в голове" — текущая задача, промежуточные результаты, понимание контекста — сжимается до краткого пересказа. Хук проверяет: записан ли WARM-резидуал в sessions.md? Если да — мягкое напоминание проверить полноту. Если нет — CRITICAL: "НЕМЕДЛЕННО запиши, иначе потеряешь".
+The session log is the only place where the process lives. Decisions store the result ("decided X because of Y"), but not the path to it ("spent three hours discussing X vs Z, the key insight was W"). The log has three functions:
 
-**post-compact-reload** — срабатывает после компрессии. Инжектит обратно в контекст Claude стек задач из roadmap и последний сессионный блок из sessions.md. Claude после сжатия сразу знает: что делать и чем только что занимался. Первая версия была на bash и ломалась на JSON-экранировании — переписали на python.
+**Short-term (1-2 sessions):** WARM residual. "Yesterday we stopped at calibration, the output is ready, the analysis hasn't been done yet." The next session starts from context, not from zero. Without this, the first 15 minutes of every session go to "where were we?"
 
-**rebuild-index** — ручной запуск. Аварийное восстановление: парсит все ADR-файлы и пересобирает индексы с нуля. Создан как страховка перед крупной миграцией (разделение монолитного индекса из 334 строк на hub + 8 доменных). Суть записей (авторская интерпретация) не восстанавливается — ставит честную заглушку "[СУТЬ НЕ ВОССТАНОВЛЕНА]". Структуру восстанавливает, смысл — нет.
+**Medium-term (3-10 sessions):** decision context. If a week later the question "why did we reject option Z?" arises — the answer may be in the session block, not in the ADR (because the ADR recorded only the winner, not all discussions).
 
-**lint-refs** — ручной запуск. Валидация целостности: все ли ссылки `[[CODE]]` ведут на существующие файлы, совпадают ли теги в файлах с тегами в индексах, соблюдён ли контракт ADR-формата. Advisory mode — предупреждает, не блокирует. Появился из осознания: при десятках компонентов с перекрёстными ссылками переименовал файл — и все ссылки на него мертвы, а никто не заметил.
+**Deep dive.** But this archive had a problem: the agent didn't know it could use it. The session-start hook showed only the latest block. Earlier blocks existed in the file, but the agent didn't know it could dive in there for context. It's like having an archive of meeting minutes but telling no one it exists.
 
-> Файлы: `.claude/hooks/` (7 скриптов)
+Solution: each session block now has a `Topics:` line with keywords. The session-start hook, when multiple blocks are present, explicitly hints: "there are N more blocks, if something is unclear — read earlier ones". The CLAUDE.md rules state: sessions.md is an archive with depth, don't limit yourself to the last block.
 
-### Автозахват черновиков — мост между работой и записью
+There is no long-term function — old blocks are absorbed by decisions and docs. Absorbed content is removed. Git history stores what was deleted.
 
-Протоколы работают, но зависят от дисциплины Claude. В конце длинной сессии Claude может не помнить, что обсуждалось в начале. Секретарский протокол спрашивает "есть ли незаписанные решения?" — но к тому моменту детали (почему решили, что отвергли) уже размыты.
+### Deep dive triggers — when to dive deeper
 
-Автозахват — поведенческий протокол: при принятии решения Claude сразу записывает черновик в `meta/drafts/`. Не полированный ADR, а сырой материал: что решили, почему, что отвергли. Команда `/draft`.
+The deep layer ("Rejected" section in ADR + old blocks in sessions.md) is a valuable resource. But accessing it for every reason is spending tokens on noise. A balance is needed: don't dive without reason, but don't miss the moment when depth is necessary.
 
-Четыре страховочных сетки на случай если Claude забудет:
-- **Stop hook** — сессия заканчивается: "запиши черновик если были обсуждения"
-- **PreCompact hook** — контекст сжимается: "запиши прежде чем потеряешь"
-- **Pre-commit hook** — перед коммитом: "есть черновики? оформи. Нет? запиши"
-- **Session-start hook** — новая сессия: "есть необработанные черновики"
+The solution is a behavioral protocol, following the same model as FAR. Not an automatic script, but a set of triggers:
 
-Автозахват и секретарский протокол — разные роли. Автозахват фиксирует сырьё (решения + рассуждения). Секретарский протокол оформляет (ADR, sessions, индексы). Автозахват дополняет FAR: FAR управляет вниманием (что держать в голове), автозахват сохраняет знания (что записать на бумагу).
+- **Reconsidering a decision.** About to change an existing decision → pay attention to the "Rejected" section in the ADR file. The file has already been read — but "read" and "paid attention to" are not the same thing for a language model. The trigger switches the reading frame: same information, but with the question "what was already tried and why it didn't work" instead of "what did we decide".
+- **Conflict between decisions.** A new proposal contradicts an existing one → look for context in sessions.md. Perhaps the old decision was made under different conditions.
+- **The "why" question.** The user asks "why not X" or "why exactly this way" → the answer may be in the session block, not in the ADR (the ADR records the winner, not all discussions).
+- **Recurring topic.** The user raises a topic that has already come up before → check the block headers in sessions.md before diving into the bodies. If a header matches — read the block body for context.
 
----
+This is the same principle as in FAR: context significance is contextual. The "Rejected" section can be COLD during normal work and HOT when reconsidering a decision. The trigger switches the significance context.
 
-## Проблема шестая: решения — это граф
-
-Решения не изолированы. Одно может зависеть от другого, влиять на третье, пересекаться с четвёртым по тематике. При 20+ решениях этот граф зависимостей не помещается в голову.
-
-### /context — карта связей
-
-Изначально /context была промпт-инструкцией: "прочитай индекс, найди запись, покажи связи". Claude делал это вручную — каждый раз парсил markdown глазами. С ростом системы ручной парсинг стал ненадёжным: Claude пропускал транзитивные связи, забывал тематические пересечения.
-
-context.py сделал это детерминистическим. Парсит все доменные индексы, строит граф, ранжирует результаты. Три режима:
-
-- `/context CODE` — прямые зависимости (1 hop), транзитивные (2 hop), тематические пересечения (общие теги). Показывает конкретные файлы для подгрузки.
-- `/context CODE!` — обратный граф: кто зависит от этого решения. Impact analysis перед изменением.
-- `/context #tag` — все решения с тегом. Тематический срез.
-
-Каждый вызов даёт одинаковый результат — не зависит от того, насколько внимательно Claude "прочитал" файл.
-
-Теги из общего словаря `_tags.md`. Новый тег — сначала в словарь с обоснованием. Это предотвращает расползание: без словаря Claude создаст #performance, #perf, #speed для одного и того же.
-
-### Агентный протокол — единообразие и фокус
-
-Без протокола Claude записывает решения каждый раз по-разному. В одном файле — полный ADR с обоснованием. В другом — три строки без "почему". В третьем — забыл записать вообще.
-
-AGENT_PROTOCOL.md фиксирует контракт: обязательные поля, формат строк, процедуру фиксации. Этот контракт — то, что парсят context.py, rebuild-index и lint-refs. Без единообразия скрипты не работают.
-
-Протокол также определяет две роли: **Архитектор** (смотрит на совместимость решений — "это новое решение конфликтует с существующим?") и **Планировщик** (смотрит на задачи — "что дальше, что заблокировано?"). Без явных ролей Claude делает всё одновременно и ничего глубоко. С ролями — переключается по контексту и работает фокусно.
-
-> Файлы: `.claude/scripts/context.py`, `.claude/commands/context.md`, `meta/_tags.md`, `agents/AGENT_PROTOCOL.md`
+> Files: `meta/decisions/_index.md` (hub), `meta/decisions/{domain}/_index.md` (domain indexes), `meta/docs/_index.md` (research hub), `meta/roadmap.md`, `meta/sessions.md`
 
 ---
 
-## Археология знаний — для проектов с историей
+## Problem four: a catalog without meaning
 
-Если проект уже шёл без системы управления знаниями — решения принимались, но не записывались. Команда `/knowledge-archaeology` проходит по истории (сессии Claude Code + git log) и восстанавливает решения ретроспективно.
+Now Claude has a library with a catalog. It can find any "book". But it doesn't understand the meaning of those books, what they're about, or why it needs them. A catalog is an address system, not a meaning map. A new agent in a new session sees indexes as a meaningless table: here are domains, here are counters, here are codes. So what?
 
-Четыре фазы: (1) извлечение из сессий и git порциями → черновики в meta/drafts/. (2) Группировка по темам, построение цепочек эволюции (решение X → изменено на Y → расширено до Z). (3) Компиляция: на конце каждой ветки — актуальное решение → ADR-файл. Промежуточные версии → секция "Эволюция", отвергнутые → "Отвергнуто". (4) Опциональный просмотр — пользователь решает, проверять каждый ADR или принять все.
+### Brief — onboarding into the meaning space
 
-Это не замена секретарского протокола — это одноразовая операция для проектов, начавших без документации.
+That's how the brief appeared — the "Project model" section in CLAUDE.md. This is not a system description. It's a letter to a new agent: here's what the project is, why it exists, how it's structured, which mechanisms are key, what the constraints are. Budget — up to 120 meaningful lines. One reading — and the agent has a working mental model.
+
+But the brief by itself didn't connect to the catalog. The agent read the letter, understood the project — then opened the index and again didn't understand how to go from understanding to navigation.
+
+The solution was a linkage: the brief references domain addresses directly in the text, and indexes are titled descriptively — filled with meaning, not just codes. The agent reads the brief, sees "domain core — system architecture" with a link to `meta/decisions/core/_index.md`, understands both what's there and why it should go there.
+
+The three-level address model:
+1. **Brief** — understanding (what this is, why, how it works)
+2. **Hub + roadmap** — navigation (where to go, what's in progress)
+3. **Domain index + /context** — details (specific decisions and their connections)
+
+> Files: `CLAUDE.md` ("Project model" section + "Initialization" section)
 
 ---
 
-## Обзор: анатомия системы
+## Problem five: discipline
+
+Everything described above is protocols. FAR, the secretary, updating indexes, recording decisions. But protocols only work if they're followed. Claude is a language model. It won't proactively check indexes before a commit, won't remember the FAR audit after twelve exchanges, won't record WARM before context compression. The system depends on discipline that is easy to break.
+
+### Hooks — automatic reminders
+
+Claude Code hooks attach to lifecycle events. They don't do the work for Claude — they remind and verify. Seven hooks, each solving a specific problem:
+
+**pre-commit-secretary** — triggers before every git commit. Shows the secretary checklist (items 0-8): did you run the FAR audit, are there unrecorded decisions, are indexes updated, is the roadmap updated. Checks for orphan files — decisions that exist as files but are absent from the index. Claude sees the reminder and fixes what was missed before the commit.
+
+**session-start-recovery** — triggers at session start. Checks four things: are there uncommitted changes from the previous session (if so — warns), how fresh is the roadmap (if older than 48 hours — recommends /far), loads the latest block from sessions.md, shows unprocessed drafts from meta/drafts/ (with a warning if older than 7 days). A new session starts with context, not from zero.
+
+**pre-compact-handoff** — triggers before context compression. This is a critical moment: Claude Code automatically compresses history when the context window overflows. Everything that was "in mind" — the current task, intermediate results, contextual understanding — gets compressed to a brief retelling. The hook checks: is the WARM residual recorded in sessions.md? If yes — a gentle reminder to check completeness. If no — CRITICAL: "write it down IMMEDIATELY or you'll lose it".
+
+**post-compact-reload** — triggers after compression. Injects back into Claude's context the task stack from the roadmap and the latest session block from sessions.md. Claude after compression immediately knows: what to do and what it was just working on. The first version was in bash and broke on JSON escaping — rewrote in python.
+
+**rebuild-index** — manual trigger. Emergency recovery: parses all ADR files and rebuilds indexes from scratch. Created as insurance before a major migration (splitting a monolithic 334-line index into hub + 8 domain indexes). The essence of entries (the author's interpretation) is not recovered — it places an honest placeholder "[ESSENCE NOT RECOVERED]". It recovers structure, not meaning.
+
+**lint-refs** — manual trigger. Integrity validation: do all `[[CODE]]` links point to existing files, do tags in files match tags in indexes, is the ADR format contract followed. Advisory mode — warns, doesn't block. Arose from the realization: with dozens of components with cross-references, you rename a file — and all links to it are dead, and nobody notices.
+
+> Files: `.claude/hooks/` (7 scripts)
+
+### Auto-capture drafts — a bridge between work and recording
+
+Protocols work, but depend on Claude's discipline. At the end of a long session, Claude may not remember what was discussed at the beginning. The secretary protocol asks "are there unrecorded decisions?" — but by that point the details (why it was decided, what was rejected) are already blurred.
+
+Auto-capture is a behavioral protocol: upon making a decision, Claude immediately writes a draft to `meta/drafts/`. Not a polished ADR, but raw material: what was decided, why, what was rejected. The `/draft` command.
+
+Four safety nets in case Claude forgets:
+- **Stop hook** — session ends: "write a draft if there were discussions"
+- **PreCompact hook** — context is being compressed: "write it down before you lose it"
+- **Pre-commit hook** — before commit: "any drafts? formalize them. None? write them"
+- **Session-start hook** — new session: "there are unprocessed drafts"
+
+Auto-capture and the secretary protocol are different roles. Auto-capture captures raw material (decisions + reasoning). The secretary protocol formalizes (ADR, sessions, indexes). Auto-capture complements FAR: FAR manages attention (what to keep in mind), auto-capture preserves knowledge (what to write down on paper).
+
+---
+
+## Problem six: decisions are a graph
+
+Decisions are not isolated. One can depend on another, influence a third, overlap with a fourth thematically. With 20+ decisions, this dependency graph doesn't fit in one's head.
+
+### /context — connection map
+
+Originally /context was a prompt instruction: "read the index, find the entry, show connections". Claude did this manually — parsing markdown by eye each time. As the system grew, manual parsing became unreliable: Claude missed transitive links, forgot thematic overlaps.
+
+context.py made this deterministic. It parses all domain indexes, builds the graph, ranks results. Three modes:
+
+- `/context CODE` — direct dependencies (1 hop), transitive (2 hop), thematic overlaps (shared tags). Shows specific files to load.
+- `/context CODE!` — reverse graph: who depends on this decision. Impact analysis before a change.
+- `/context #tag` — all decisions with a tag. A thematic cross-section.
+
+Each call gives the same result — it doesn't depend on how carefully Claude "read" the file.
+
+Tags come from a shared dictionary `_tags.md`. A new tag — first goes into the dictionary with justification. This prevents sprawl: without a dictionary, Claude will create #performance, #perf, #speed for the same thing.
+
+### Agent protocol — uniformity and focus
+
+Without a protocol, Claude records decisions differently every time. In one file — a full ADR with rationale. In another — three lines without "why". In a third — forgot to record it at all.
+
+AGENT_PROTOCOL.md establishes the contract: required fields, line format, the recording procedure. This contract is what context.py, rebuild-index, and lint-refs parse. Without uniformity, the scripts don't work.
+
+The protocol also defines two roles: **Architect** (looks at decision compatibility — "does this new decision conflict with an existing one?") and **Planner** (looks at tasks — "what's next, what's blocked?"). Without explicit roles, Claude does everything simultaneously and nothing deeply. With roles — it switches by context and works with focus.
+
+> Files: `.claude/scripts/context.py`, `.claude/commands/context.md`, `meta/_tags.md`, `agents/AGENT_PROTOCOL.md`
+
+---
+
+## Knowledge archaeology — for projects with history
+
+If a project was already running without a knowledge management system — decisions were made but not recorded. The `/knowledge-archaeology` command goes through the history (Claude Code sessions + git log) and recovers decisions retrospectively.
+
+Four phases: (1) extraction from sessions and git in batches → drafts in meta/drafts/. (2) Grouping by topics, building evolution chains (decision X → changed to Y → expanded to Z). (3) Compilation: at the end of each chain — the current decision → ADR file. Intermediate versions → "Evolution" section, rejected ones → "Rejected". (4) Optional review — the user decides whether to review each ADR or accept all.
+
+This is not a replacement for the secretary protocol — it's a one-time operation for projects that started without documentation.
+
+---
+
+## Overview: system anatomy
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  Граф зависимостей                                  │
-│  /context, теги, агентный протокол                   │
-│  "Как видеть связи между решениями"                  │
+│  Dependency graph                                    │
+│  /context, tags, agent protocol                      │
+│  "How to see connections between decisions"           │
 ├─────────────────────────────────────────────────────┤
-│  Автоматизация                                       │
-│  6 хуков: pre-commit, session-start,                 │
+│  Automation                                          │
+│  6 hooks: pre-commit, session-start,                 │
 │  pre/post-compact, rebuild, lint                     │
-│  "Как не забыть процесс"                             │
+│  "How not to forget the process"                     │
 ├─────────────────────────────────────────────────────┤
-│  Смысловая навигация                                 │
-│  Brief + индексы + roadmap + sessions                │
-│  "Как понимать и находить нужное"                    │
+│  Semantic navigation                                 │
+│  Brief + indexes + roadmap + sessions                │
+│  "How to understand and find what's needed"          │
 ├─────────────────────────────────────────────────────┤
-│  Управление вниманием                                │
-│  FAR: HOT/WARM/COLD + Горизонт                       │
-│  "Как не утонуть в длинной сессии"                   │
+│  Attention management                                │
+│  FAR: HOT/WARM/COLD + Horizon                        │
+│  "How not to drown in a long session"                │
 ├─────────────────────────────────────────────────────┤
-│  Долговременная память                               │
-│  ADR-файлы (decisions/)                              │
-│  "Как помнить между сессиями"                        │
+│  Long-term memory                                    │
+│  ADR files (decisions/)                              │
+│  "How to remember between sessions"                  │
 └─────────────────────────────────────────────────────┘
 ```
 
-Каждый слой нужен только когда предыдущий перестаёт справляться. Маленький проект с 5 решениями может обойтись ADR + brief. Полный стек — для проектов с десятками решений и длинными сессиями.
+Each layer is needed only when the previous one can no longer cope. A small project with 5 decisions can get by with ADR + brief. The full stack is for projects with dozens of decisions and long sessions.
 
 ---
 
-## Три слоя артефактов в ручном графе
+## Three artifact layers in the manual graph
 
-При обсуждении автоматического графа знаний (GraphRAG) как опционального расширения системы выяснилось, что "ручной граф" — не монолит. В нём три слоя с разной природой:
+When discussing an automatic knowledge graph (GraphRAG) as an optional system extension, it turned out that the "manual graph" is not a monolith. It has three layers with different natures:
 
-### 1. Авторские утверждения о каузации
+### 1. Authorial assertions about causation
 
-Поля "Зависит от" / "Влияет на" в ADR, секция "Пересмотреть если", секция "Отвергнуто". Это **нормативные контракты** — автор не описывает обнаруженную связь, а устанавливает обязательство: "если изменится X, пересмотреть Y". Как разница между "эти два закона тематически связаны" и "этот закон ссылается на тот закон" — второе создаёт юридическое последствие.
+The "Depends on" / "Affects" fields in ADR, the "Reconsider if" section, the "Rejected" section. These are **normative contracts** — the author doesn't describe a discovered connection but establishes an obligation: "if X changes, reconsider Y". Like the difference between "these two laws are thematically related" and "this law references that law" — the second creates a legal consequence.
 
-Автоматический граф **не может заменить** этот слой — даже при идеальной точности модели. Дело не в качестве: автор решает, какие связи нормативны. Модель обнаруживает фактические связи, но не знает, какие из них должны вызвать каскадный пересмотр. Однако автоматический граф полезен как **аудитор** — "вот связи, которые вы не зафиксировали, но которые существуют в тексте".
+An automatic graph **cannot replace** this layer — even with perfect model accuracy. It's not about quality: the author decides which connections are normative. The model discovers factual connections but doesn't know which ones should trigger a cascading reconsideration. However, an automatic graph is useful as an **auditor** — "here are connections you didn't record but which exist in the text".
 
-### 2. Авторская курация
+### 2. Authorial curation
 
-Теги (из словаря `_tags.md`), доменная принадлежность решений, однострочные сути в индексах. Это **авторская классификация и организация** — человек решает, что решение относится к домену X и помечается тегом Y. rebuild-index ставит заглушку "[СУТЬ НЕ ВОССТАНОВЛЕНА]" — именно потому что суть авторская, скрипт её воссоздать не может.
+Tags (from the dictionary `_tags.md`), domain assignment of decisions, one-line essences in indexes. This is **authorial classification and organization** — a human decides that a decision belongs to domain X and is tagged with Y. rebuild-index places a placeholder "[ESSENCE NOT RECOVERED]" — precisely because the essence is authorial, a script cannot recreate it.
 
-Автоматический граф может **дополнять** этот слой (обнаруживать кластеры, которые автор не увидел), но не **заменять** — авторская онтология является частью смысла решения.
+An automatic graph can **supplement** this layer (discover clusters the author didn't see) but not **replace** it — the authorial ontology is part of the decision's meaning.
 
-### 3. Механическая обвязка
+### 3. Mechanical scaffolding
 
-lint-refs (валидация целостности), rebuild-index (аварийное восстановление), парсинг формата в context.py, обход графа. Это инфраструктура обслуживания.
+lint-refs (integrity validation), rebuild-index (emergency recovery), format parsing in context.py, graph traversal. This is service infrastructure.
 
-Автоматический граф **заменяет** этот слой: валидация, обход, визуализация — всё это можно делать автоматически и надёжнее.
+An automatic graph **replaces** this layer: validation, traversal, visualization — all of this can be done automatically and more reliably.
 
-### Итог по GraphRAG
+### GraphRAG summary
 
-GraphRAG (опциональное расширение) — не замена ручного графа, а его усиление:
-- **Заменяет** механическую обвязку (слой 3)
-- **Дополняет** авторскую курацию (слой 2) — обнаруживает то, что автор не увидел
-- **Не трогает** авторские контракты (слой 1) — они остаются в ADR-файлах как контент
+GraphRAG (optional extension) is not a replacement for the manual graph, but its augmentation:
+- **Replaces** the mechanical scaffolding (layer 3)
+- **Supplements** authorial curation (layer 2) — discovers what the author didn't see
+- **Doesn't touch** authorial contracts (layer 1) — they remain in ADR files as content
 
-### Техническая архитектура GraphRAG-слоя
+### GraphRAG layer technical architecture
 
-Исследование (meta/docs/landscape/graphrag-local-stack.md) определило стек:
+Research (meta/docs/landscape/graphrag-local-stack.md) identified the stack:
 
-**Engine: LightRAG** (единственный фреймворк с `insert_custom_kg` — загрузка готового графа без LLM для extraction). Хранилище по умолчанию: JSON + NanoVectorDB + NetworkX, всё в папке на диске.
+**Engine: LightRAG** (the only framework with `insert_custom_kg` — loading a pre-built graph without LLM for extraction). Default storage: JSON + NanoVectorDB + NetworkX, all in a folder on disk.
 
-**Embedding: FastEmbed + multilingual-e5-large** (1024 dimensions, 100+ языков, RU+EN, ONNX без PyTorch). Локально, бесплатно.
+**Embedding: FastEmbed + multilingual-e5-large** (1024 dimensions, 100+ languages, RU+EN, ONNX without PyTorch). Local, free.
 
-**LLM для обслуживания графа: OpenRouter** (Gemma 3 12B бесплатно или Qwen3.6 Plus за доли цента). Используется только для merge дубликатов сущностей — редкая операция. Вся тяжёлая работа (extraction, ответы на вопросы) — Claude через подписку.
+**LLM for graph maintenance: OpenRouter** (Gemma 3 12B free or Qwen3.6 Plus for fractions of a cent). Used only for merging duplicate entities — a rare operation. All heavy lifting (extraction, question answering) — Claude via subscription.
 
-**MCP-сервер: свой** (~100-150 строк Python). Ни один существующий MCP-сервер не поддерживает insert_custom_kg. Инструменты: insert_kg, search_knowledge, delete_source, get_graph_stats.
+**MCP server: custom** (~100-150 lines of Python). No existing MCP server supports insert_custom_kg. Tools: insert_kg, search_knowledge, delete_source, get_graph_stats.
 
-**Поток данных:**
+**Data flow:**
 ```
-При коммите:
-  Claude (подписка) → извлекает тройки из изменённых файлов
-    → стандартизирует имена сущностей
-    → вызывает MCP: insert_kg(json)
-    → LightRAG: insert_custom_kg → embedding → граф + вектор
+On commit:
+  Claude (subscription) → extracts triples from changed files
+    → standardizes entity names
+    → calls MCP: insert_kg(json)
+    → LightRAG: insert_custom_kg → embedding → graph + vector
 
-При запросе:
-  Claude (подписка) → вызывает MCP: search_knowledge(query)
-    → LightRAG: hybrid query (граф + вектор, only_need_context=True)
-    → возвращает сырой контекст (без LLM-синтеза)
-    → Claude читает и отвечает
+On query:
+  Claude (subscription) → calls MCP: search_knowledge(query)
+    → LightRAG: hybrid query (graph + vector, only_need_context=True)
+    → returns raw context (without LLM synthesis)
+    → Claude reads and answers
 
-Стоимость сверх подписки: ~$0/мес (бесплатная модель OpenRouter)
-                          или ~$0.05/мес (Qwen3.6 Plus)
+Cost beyond subscription: ~$0/mo (free OpenRouter model)
+                          or ~$0.05/mo (Qwen3.6 Plus)
 ```
 
-**Установка расширенной версии:**
+**Extended version installation:**
 ```bash
 pip install lightrag-hku fastembed
-# + подключить MCP-сервер в конфиг Claude Code
-# + установить OPENROUTER_API_KEY
+# + connect MCP server in Claude Code config
+# + set OPENROUTER_API_KEY
 ```
 
 ---
 
-## Потоки данных
+## Data flows
 
-### Старт сессии
+### Session start
 ```
 session-start-recovery hook
-  → есть незакоммиченное? → предупредить
-  → roadmap устарел? → рекомендовать /far
-  → загрузить последний блок sessions.md
+  → uncommitted changes? → warn
+  → roadmap outdated? → recommend /far
+  → load latest block from sessions.md
 
-Claude читает CLAUDE.md
-  → brief: понимание проекта
-  → инициализация: что читать дальше
-  → по необходимости: hub → доменный index → файлы
+Claude reads CLAUDE.md
+  → brief: project understanding
+  → initialization: what to read next
+  → as needed: hub → domain index → files
 ```
 
-### В процессе работы
+### During work
 ```
-FAR-аудит (автотриггер или /far)
-  → HOT: что в фокусе сейчас
-  → WARM: что отработано, но ценно (тезисно)
-  → COLD: что забыть
-  → Горизонт: что понадобится дальше
+FAR audit (auto-trigger or /far)
+  → HOT: what's in focus now
+  → WARM: what's been processed but is valuable (bullet points)
+  → COLD: what to forget
+  → Horizon: what will be needed next
 
-Решение принято → секретарь фиксирует
-  → ADR-файл с обоснованием и связями
-  → доменный _index → hub _index
-  → если меняет модель проекта → обновить brief
+Decision made → secretary records
+  → ADR file with rationale and links
+  → domain _index → hub _index
+  → if it changes the project model → update brief
 ```
 
-### Коммит
+### Commit
 ```
 pre-commit-secretary hook
-  → секретарский чеклист (7 пунктов)
-  → проверка: индексы, roadmap, sessions обновлены?
-  → поиск orphan-файлов
-  → Claude исправляет пропущенное
-  → коммит
+  → secretary checklist (7 items)
+  → check: indexes, roadmap, sessions updated?
+  → orphan file search
+  → Claude fixes what was missed
+  → commit
 ```
 
-### Компрессия контекста
+### Context compression
 ```
 pre-compact-handoff hook
-  → WARM записан? → мягкое напоминание
-  → WARM НЕ записан? → CRITICAL: запиши сейчас
+  → WARM recorded? → gentle reminder
+  → WARM NOT recorded? → CRITICAL: write it down now
 
-[компрессия]
+[compression]
 
 post-compact-reload hook
-  → инжектит стек задач + последний сессионный блок
-  → Claude продолжает с контекстом
+  → injects task stack + latest session block
+  → Claude continues with context
 ```
