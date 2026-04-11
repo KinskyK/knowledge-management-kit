@@ -1,9 +1,9 @@
-# Документация: landscape
-Документов: 1
+# Documentation: landscape
+Documents: 1
 
-Обзор существующих решений для memory/context management в LLM-агентах.
+Existing solutions overview for memory/context management in LLM agents.
 
-## Документы
-| Файл | Описание | Дата |
-|------|----------|------|
-| graphrag-local-stack.md | Исследование технологий для локального GraphRAG-слоя: embeddings, vector stores, graph DBs, фреймворки, MCP-серверы | 2025-04-09 |
+## Documents
+| File | Description | Date |
+|------|-------------|------|
+| graphrag-local-stack.md | Research on technologies for local GraphRAG layer: embeddings, vector stores, graph DBs, frameworks, MCP servers | 2025-04-09 |

@@ -1,4 +1,4 @@
-# Документация: context-management
-Документов: 0
+# Documentation: context-management
+Documents: 0
 
-Управление контекстом LLM, FAR, compact, семантический аудит.
+LLM context management, FAR, compact, semantic audit.

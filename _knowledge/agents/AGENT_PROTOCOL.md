@@ -1,102 +1,102 @@
-# Протокол агентной сети — claude-memory-kit
+# Agent Network Protocol — claude-memory-kit
 
-> Hub-файл. Детальные протоколы в spoke-файлах. Читается при инициализации.
-
----
-
-## Поведенческие принципы
-
-- Если решение конфликтует с decisions файлами — скажи, со ссылкой на код решения.
-- Сначала анализ и вопрос, потом формулировка. Не предлагай без запроса.
-- Каждое принятое решение фиксируется сразу, не откладывается.
-- При создании решения — сверься с meta/_tags.md (словарь тегов).
-- При параллельных сессиях — НЕ редактировать meta/ файлы одновременно. Конфликт → сообщить пользователю.
-- При закрытии блока или пересмотре решения, код которого есть в Модели проекта — проверь и обнови brief в CLAUDE.md.
+> Hub file. Detailed protocols in spoke files. Read during initialization.
 
 ---
 
-## Встроенные роли
+## Behavioral Principles
 
-Main Agent переключает роли по контексту разговора.
+- If a decision conflicts with decisions files — say so, with a reference to the decision code.
+- First analysis and question, then formulation. Don't propose without being asked.
+- Every accepted decision is recorded immediately, not deferred.
+- When creating a decision — check against meta/_tags.md (Tag Dictionary).
+- During parallel sessions — DO NOT edit meta/ files simultaneously. Conflict → notify the user.
+- When closing a block or reconsidering a decision whose code is in the Project Model — check and update the brief in CLAUDE.md.
 
-| Роль | Мандат | Триггеры | Формат вывода |
+---
+
+## Built-in Roles
+
+Main Agent switches roles based on conversation context.
+
+| Role | Mandate | Triggers | Output Format |
 |---|---|---|---|
-| Архитектор | Совместимость решений, обнаружение конфликтов | конфликт, несовместимость, @architect | КОНФЛИКТ → КОДЫ → СУТЬ → ВАРИАНТЫ → РЕКОМЕНДАЦИЯ |
-| Планировщик | Статус блоков, зависимости, следующий шаг | что дальше, статус, @planner | ЗАВЕРШЕНЫ → В РАБОТЕ → ЗАБЛОКИРОВАНЫ → СЛЕДУЮЩИЙ ШАГ |
+| Architect | Decision compatibility, conflict detection | conflict, incompatibility, @architect | CONFLICT → CODES → ESSENCE → OPTIONS → RECOMMENDATION |
+| Planner | Block status, dependencies, next step | what's next, status, @planner | COMPLETED → IN PROGRESS → BLOCKED → NEXT STEP |
 
 ---
 
-## Протокол фиксации решений
+## Decision Recording Protocol
 
-После каждого принятого решения — немедленно:
-1. Присвоить код (DOMAIN-xx)
-2. Записать в нужный decisions файл в ADR-формате
-3. Обновить _index.md
-4. Если появился новый файл — обновить манифест
+After every accepted decision — immediately:
+1. Assign a code (DOMAIN-xx)
+2. Record in the appropriate decisions file in ADR format
+3. Update _index.md
+4. If a new file appeared — update the manifest
 
-ADR-формат:
+ADR format:
 
-**Обязательные поля:**
-- **Зависит от**: [[коды]]
-- **Влияет на**: [[коды]]
-- **Решение**: [что решили]
-- **Почему**: [обоснование]
-- **Пересмотреть если**: [условия]
-- **Статус**: accepted | draft [■ АКСИОМА | ◆ ПРАВИЛО | ● ГИПОТЕЗА]
+**Required fields:**
+- **Depends on**: [[codes]]
+- **Influences**: [[codes]]
+- **Decision**: [what was decided]
+- **Why**: [rationale]
+- **Reconsider if**: [conditions]
+- **Status**: accepted | draft [Axiom | Rule | Hypothesis]
 
-**Рекомендуемые секции** (пропускать только если нечего записать):
-- **Отвергнуто**: какие альтернативы рассматривались и почему отброшены. Это глубокий слой — при пересмотре решения агент опирается на эту секцию, чтобы не предлагать уже отвергнутое.
+**Recommended sections** (skip only if there's nothing to record):
+- **Rejected**: which alternatives were considered and why they were discarded. This is a deep layer — when reconsidering a decision, the agent relies on this section to avoid proposing already-rejected options.
 
-**Опциональные секции** (добавляются когда нужны):
-- **Контекст**: что вызвало вопрос
-- **Эволюция vN-1→vN**: что сломалось в предыдущей версии
-- **Пример**: сценарий
-- Ссылки на исследования: основано на → docs/...
+**Optional sections** (added when needed):
+- **Context**: what raised the question
+- **Evolution vN-1→vN**: what broke in the previous version
+- **Example**: scenario
+- References to research: based on → docs/...
 
-**Контракт формата** (для rebuild-index.sh):
-- Строка 1: `# CODE — название`
-- Строка 3: `#хештеги` (из meta/_tags.md)
-- Поле `^- **Статус**:` — последнее вхождение
+**Format contract** (for rebuild-index.sh):
+- Line 1: `# CODE — name`
+- Line 3: `#hashtags` (from meta/_tags.md)
+- Field `^- **Status**:` — last occurrence
 
-При изменении существующего решения — перезаписать файл, добавить секцию "Эволюция vN-1→vN". Git history хранит предыдущие версии.
-
----
-
-## Протокол извлечения троек (GraphRAG)
-
-При наличии GraphRAG (`/graphrag extract` доступен):
-
-После записи/изменения ADR — извлеки тройки:
-1. Сущности: решение (код), связанные концепции, проблемы, механизмы
-2. Связи: из полей "Зависит от"/"Влияет на" (weight 1.0) + из текста (weight 0.7-0.9)
-3. Чанки: секции "Решение" + "Почему" + "Отвергнуто"
-
-Каноничность имён: одна сущность = одно имя. "FAR Protocol", не "FAR" / "Full Attention Residuals" / "ФАР". Проверяй `check_entity` перед созданием.
-
-Типы сущностей: decision, concept, problem, domain, mechanism, file.
-Типы связей: depends-on, influences, solves, part-of, supersedes, rejected, requires, enables, contradicts.
-
-Шаблон: `templates/extraction-template.json`.
+When modifying an existing decision — overwrite the file, add an "Evolution vN-1→vN" section. Git history stores previous versions.
 
 ---
 
-## Жизненный цикл ⚠ триггеров пересмотра
+## Triple Extraction Protocol (GraphRAG)
 
-Триггеры "Пересмотреть если" живут в decisions/_index.md (⚠ маркер).
+When GraphRAG is present (`/graphrag extract` is available):
 
-| Исход | Действие |
+After writing/modifying an ADR — extract triples:
+1. Entities: decision (code), related concepts, problems, mechanisms
+2. Relations: from "Depends on"/"Influences" fields (weight 1.0) + from text (weight 0.7-0.9)
+3. Chunks: "Decision" + "Why" + "Rejected" sections
+
+Name canonicity: one entity = one name. "FAR Protocol", not "FAR" / "Full Attention Residuals". Check `check_entity` before creating.
+
+Entity types: decision, concept, problem, domain, mechanism, file.
+Relation types: depends-on, influences, solves, part-of, supersedes, rejected, requires, enables, contradicts.
+
+Template: `templates/extraction-template.json`.
+
+---
+
+## Review Trigger Lifecycle
+
+"Reconsider if" triggers live in decisions/_index.md (warning marker).
+
+| Outcome | Action |
 |---|---|
-| Решение пересмотрено | Убрать ⚠ из _index. Обновить файл (новая версия). |
-| Решение подтверждено | Убрать ⚠ из _index. Добавить в файл: "Проверено: дата, контекст". |
-| Ещё не время | Оставить ⚠. |
+| Decision reconsidered | Remove warning from _index. Update file (new version). |
+| Decision confirmed | Remove warning from _index. Add to file: "Verified: date, context". |
+| Not yet time | Keep warning. |
 
 ---
 
-## Навигация по spoke-файлам
+## Spoke File Navigation
 
-Spoke-файлы создаются по мере роста проекта. Начинай с этого hub-файла, выноси в spoke когда hub становится перегружен. Примеры возможных spoke:
+Spoke files are created as the project grows. Start with this hub file, extract to spoke when the hub becomes overloaded. Examples of possible spokes:
 
-- agents/pipelines.md — пайплайны, HRT, loop-back
-- agents/specialists.md — детальные протоколы специалистов
-- agents/context-packages.md — Zone/Specialist load, маршрутизация
-- agents/verification.md — верификация, self-assessment, арбитраж
+- agents/pipelines.md — pipelines, HRT, loop-back
+- agents/specialists.md — detailed specialist protocols
+- agents/context-packages.md — Zone/Specialist load, routing
+- agents/verification.md — verification, self-assessment, arbitration

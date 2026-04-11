@@ -1,14 +1,14 @@
 # Decisions Hub
-Решений: 0 | ■ 0 | ◆ 0 | ● 0
-Доменные индексы: meta/decisions/{domain}/_index.md
+Decisions: 0 | ■ 0 | ◆ 0 | ● 0
+Domain indexes: meta/decisions/{domain}/_index.md
 
-Легенда: ■ АКСИОМА | ◆ ПРАВИЛО | ● ГИПОТЕЗА
+Legend: ■ AXIOM | ◆ RULE | ● HYPOTHESIS
 
-## Домены
-| Домен | Решений | Статистика | Описание |
-|-------|---------|------------|----------|
-| core | 0 | ■ 0 ◆ 0 ● 0 | Архитектура KM-системы, протоколы, форматы |
-| integration | 0 | ■ 0 ◆ 0 ● 0 | Процесс установки, адаптация под проект |
+## Domains
+| Domain | Decisions | Statistics | Description |
+|--------|-----------|------------|-------------|
+| core | 0 | ■ 0 ◆ 0 ● 0 | KM system architecture, protocols, formats |
+| integration | 0 | ■ 0 ◆ 0 ● 0 | Installation process, project adaptation |
 
-## ⚠ Триггеры пересмотра
-(пока пусто)
+## ⚠ Review Triggers
+(empty)

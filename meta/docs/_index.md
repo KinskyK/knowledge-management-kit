@@ -1,10 +1,10 @@
-# Карта исследований
+# Research Map
 
-Правило: перед ответом на вопрос по теме — прочитай файл. Не отвечай по памяти.
-Доменные индексы: meta/docs/{topic}/_index.md
+Rule: before answering a question on a topic — read the file. Don't answer from memory.
+Domain indexes: meta/docs/{topic}/_index.md
 
-## Темы
-| Тема | Документов | Описание |
-|------|------------|----------|
-| context-management | 0 | Управление контекстом LLM, FAR, compact |
-| landscape | 1 | Обзор существующих решений, конкуренты |
+## Topics
+| Topic | Documents | Description |
+|-------|-----------|-------------|
+| context-management | 0 | LLM context management, FAR, compact |
+| landscape | 1 | Existing solutions overview, competitors |

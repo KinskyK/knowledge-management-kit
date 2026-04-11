@@ -1,158 +1,158 @@
 # Full Attention Residuals (FAR)
 
-**Статус:** рабочая спецификация v0.1
+**Status:** working specification v0.1
 
 ---
 
-## Суть принципа
+## Core Principle
 
-Full Attention Residuals — проактивное семантическое управление контекстом со стороны модели. Модель не ждёт, пока контекст переполнится и будет механически сжат (/compact), а периодически проводит **семантический аудит** — осмысляет, что в контексте живо, что отработано, что мертво.
+Full Attention Residuals is proactive semantic context management by the model. The model doesn't wait for the context to overflow and be mechanically compressed (/compact), but periodically performs a **semantic audit** — reflecting on what in the context is alive, what is spent, and what is dead.
 
-### Ключевое отличие от /compact
+### Key Difference from /compact
 
-| | /compact (реактивная компрессия) | FAR (проактивный аудит) |
+| | /compact (reactive compression) | FAR (proactive audit) |
 |---|---|---|
-| **Когда** | При переполнении контекста | Периодически, по триггерам |
-| **Как** | Механическое сжатие всего | Семантическая сортировка по слоям |
-| **Что теряется** | Непредсказуемо | Осознанно — только мусорный слой |
-| **Горизонт** | Назад (что было) | Вперёд (что понадобится) |
-| **Агентность** | Пассивная | Активная — модель управляет своим вниманием |
+| **When** | On context overflow | Periodically, by triggers |
+| **How** | Mechanical compression of everything | Semantic sorting by layers |
+| **What's lost** | Unpredictable | Deliberate — only the garbage layer |
+| **Horizon** | Backward (what was) | Forward (what will be needed) |
+| **Agency** | Passive | Active — the model manages its own attention |
 
 ---
 
-## Три слоя контекста
+## Three Context Layers
 
-### 1. Активный слой (HOT)
+### 1. Active Layer (HOT)
 
-> То, что нужно прямо сейчас и в ближайшем будущем.
+> What is needed right now and in the near future.
 
-- Текущая задача и её подзадачи
-- Открытые вопросы, ожидающие решения
-- Ключевые ограничения и требования
-- Незакрытые зависимости (что от чего зависит)
+- Current task and its subtasks
+- Open questions awaiting decisions
+- Key constraints and requirements
+- Unresolved dependencies (what depends on what)
 
-**Формат маркировки:** `[HOT]` — сохранять в полном объёме.
+**Marking format:** `[HOT]` — preserve in full.
 
-### 2. Архивный слой (WARM)
+### 2. Archive Layer (WARM)
 
-> Отработано, но семантически значимо — может понадобиться для контекста или ретроспективы.
+> Completed but semantically significant — may be needed for context or retrospective.
 
-- Принятые решения и их обоснования (почему X, а не Y)
-- Результаты завершённых этапов (факты, не процесс)
-- Выявленные паттерны и инсайты
-- Ошибки, которые не стоит повторять
+- Accepted decisions and their rationale (why X, not Y)
+- Results of completed stages (facts, not process)
+- Discovered patterns and insights
+- Mistakes not worth repeating
 
-**Формат маркировки:** `[WARM]` — сжать до тезисов, сохранить суть.
+**Marking format:** `[WARM]` — compress to bullet points, preserve the essence.
 
-### 3. Мусорный слой (COLD)
+### 3. Garbage Layer (COLD)
 
-> Нерелевантно — промежуточные шаги, отработанные гипотезы, шум.
+> Irrelevant — intermediate steps, exhausted hypotheses, noise.
 
-- Пробные попытки, которые ни к чему не привели
-- Промежуточные рассуждения, уже воплощённые в решении
-- Дублирующая информация
-- Технический шум (вывод команд, логи, уже обработанные)
+- Trial attempts that led nowhere
+- Intermediate reasoning already embodied in a decision
+- Duplicate information
+- Technical noise (command output, logs, already processed)
 
-**Формат маркировки:** `[COLD]` — можно безопасно забыть.
-
----
-
-## Триггеры аудита
-
-Модель инициирует семантический аудит контекста при наступлении любого из условий:
-
-### Автоматические триггеры
-
-1. **Смена фазы работы** — переход от исследования к реализации, от реализации к тестированию, и т.д.
-2. **Закрытие крупной подзадачи** — завершён логически самостоятельный блок работы.
-3. **Накопление контекста** — прошло 8-12 обменов репликами без аудита.
-4. **Изменение направления** — пользователь переключает тему или пересматривает подход.
-5. **Перед сложным решением** — модель чувствует, что контекст перегружен и мешает ясности.
-
-### Ручной триггер
-
-Пользователь может явно запросить: **«/far»**, **«сделай FAR-аудит»** или **«проведи семантический аудит»**.
+**Marking format:** `[COLD]` — can be safely forgotten.
 
 ---
 
-## Формат аудита
+## Audit Triggers
 
-При срабатывании триггера модель выдаёт структурированный блок:
+The model initiates a semantic context audit when any of the following conditions occur:
+
+### Automatic Triggers
+
+1. **Work phase change** — transition from research to implementation, from implementation to testing, etc.
+2. **Completion of a major subtask** — a logically self-contained block of work is finished.
+3. **Context accumulation** — 8-12 exchanges have passed without an audit.
+4. **Direction change** — the user switches topics or reconsiders an approach.
+5. **Before a complex decision** — the model senses the context is overloaded and impairs clarity.
+
+### Manual Trigger
+
+The user can explicitly request: **"/far"**, **"do a FAR audit"**, or **"perform a semantic audit"**.
+
+---
+
+## Audit Format
+
+When a trigger fires, the model outputs a structured block:
 
 ```
-## FAR-аудит
+## FAR Audit
 
-### [HOT] Активное
-- <что сейчас в фокусе>
-- <открытые вопросы>
-- <ближайшие шаги>
+### [HOT] Active
+- <what's currently in focus>
+- <open questions>
+- <next steps>
 
-### [WARM] Архив
-- <ключевые решения, принятые ранее>
-- <результаты, на которые можно опираться>
+### [WARM] Archive
+- <key decisions made earlier>
+- <results to build upon>
 
-### [COLD] Сброс
-- <что больше не нужно держать в голове>
+### [COLD] Discard
+- <what no longer needs to be kept in mind>
 
-### Горизонт
-- <что, вероятно, понадобится дальше — предвосхищение>
+### Horizon
+- <what will likely be needed next — anticipation>
 ```
 
-Секция **Горизонт** — ключевое отличие FAR от простого резюме. Модель не только фиксирует текущее состояние, но и прогнозирует, какая информация станет актуальной на следующем шаге.
+The **Horizon** section is the key differentiator of FAR from a simple summary. The model not only captures the current state but also predicts what information will become relevant at the next step.
 
 ---
 
-## Принципы оценки
+## Evaluation Principles
 
-### 1. Запрос определяет значимость, а не сам контент
+### 1. The query determines significance, not the content itself
 
-Текущая задача/фаза — это «запрос». **Значимость контекста не абсолютна, а контекстуальна.** Одна и та же информация может быть HOT при отладке и COLD при рефакторинге. При смене фазы работы необходим пере-аудит.
+The current task/phase is the "query." **Context significance is not absolute but contextual.** The same information can be HOT during debugging and COLD during refactoring. When the work phase changes, a re-audit is necessary.
 
-### 2. Объём обсуждения ≠ значимость
+### 2. Discussion volume ≠ significance
 
-Если на тупиковую ветку потрачено 10 реплик, это не делает её WARM. Оценивать по **семантической ценности**, а не по количеству текста.
+If 10 exchanges were spent on a dead-end branch, that doesn't make it WARM. Evaluate by **semantic value**, not by amount of text.
 
-### 3. HOT — конкуренция за внимание
+### 3. HOT — competition for attention
 
-HOT-слой должен быть **компактным**. Если в HOT попадает слишком много — внимание размывается и ни один элемент не получает достаточного веса. Практическое правило: **HOT-слой — не более 3-5 пунктов**.
-
----
-
-## Блочность
-
-Реплики в диалоге естественно группируются в семантические блоки:
-- **Блок ориентации** — понимание задачи, вопросы, уточнения
-- **Блок исследования** — поиск, чтение кода, анализ
-- **Блок решения** — выбор подхода, обоснование
-- **Блок реализации** — написание кода, тестирование
-- **Блок рефлексии** — оценка результата, выводы
-
-FAR-аудит оперирует на уровне блоков: завершённый блок целиком переходит в WARM (сжатый до тезисов) или COLD (сброшен), а не каждая реплика оценивается отдельно.
+The HOT layer must be **compact**. If too much lands in HOT — attention dilutes and no single element receives sufficient weight. Practical rule: **HOT layer — no more than 3-5 items**.
 
 ---
 
-## Поведенческая реализация
+## Blockiness
 
-FAR — это не внешний инструмент, а **поведенческий протокол**. Модель выполняет его в рамках обычного диалога:
+Exchanges in a dialogue naturally group into semantic blocks:
+- **Orientation block** — understanding the task, questions, clarifications
+- **Research block** — searching, reading code, analysis
+- **Decision block** — choosing an approach, rationale
+- **Implementation block** — writing code, testing
+- **Reflection block** — evaluating the result, conclusions
 
-- **Уровень 1: Явный аудит** — модель вставляет FAR-блок в ответ при триггере. Пользователь видит и корректирует.
-- **Уровень 2: Тихий аудит** — модель пересматривает контекст «про себя» и строит более сфокусированный ответ.
-- **Уровень 3: Интеграция** — HOT фиксируется в TodoWrite, WARM записывается в sessions.md.
-
----
-
-## Связка FAR → sessions.md
-
-WARM-резидуал из FAR-аудита = подготовительный материал для `meta/sessions.md`. При коммите: WARM из последнего FAR-аудита записывается в сессионный блок sessions.md. FAR-аудит — поведенческий протокол (в CLAUDE.md), pre-commit хук НАПОМИНАЕТ о нём, но не исполняет.
+FAR audit operates at the block level: a completed block transitions entirely to WARM (compressed to bullet points) or COLD (discarded), rather than each exchange being evaluated individually.
 
 ---
 
-## Метрики качества
+## Behavioral Implementation
 
-Как понять, что FAR работает:
+FAR is not an external tool but a **behavioral protocol**. The model executes it within a regular dialogue:
 
-1. **Когерентность** — модель не теряет нить при длинных сессиях
-2. **Отсутствие повторов** — модель не переоткрывает уже решённые вопросы
-3. **Точность предвосхищения** — секция «Горизонт» совпадает с реальным развитием
-4. **Управляемость контекста** — пользователь может сказать «вернись к X» и модель знает, что это WARM-слой
-5. **Чистота внимания** — модель не тратит ресурсы на COLD-информацию
+- **Level 1: Explicit audit** — the model inserts a FAR block in the response at a trigger. The user sees and corrects.
+- **Level 2: Silent audit** — the model reviews context "internally" and produces a more focused response.
+- **Level 3: Integration** — HOT is captured in TodoWrite, WARM is written to sessions.md.
+
+---
+
+## FAR → sessions.md Link
+
+The WARM residual from a FAR audit = preparatory material for `meta/sessions.md`. On commit: WARM from the latest FAR audit is written to the session block of sessions.md. The FAR audit is a behavioral protocol (in CLAUDE.md); the pre-commit hook REMINDS about it but does not execute it.
+
+---
+
+## Quality Metrics
+
+How to tell that FAR is working:
+
+1. **Coherence** — the model doesn't lose the thread during long sessions
+2. **Absence of repetition** — the model doesn't rediscover already-resolved questions
+3. **Anticipation accuracy** — the "Horizon" section matches actual developments
+4. **Context controllability** — the user can say "go back to X" and the model knows it's a WARM layer
+5. **Attention purity** — the model doesn't spend resources on COLD information

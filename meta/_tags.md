@@ -1,12 +1,12 @@
-# Словарь хештегов
+# Tag Dictionary
 
-Общий для meta/decisions/ и meta/docs/. Новый тег → сначала добавь сюда + обоснуй.
+Shared across meta/decisions/ and meta/docs/. New tag → add here first + justify.
 
-## Система
-- #hooks — хуки Claude Code (pre-commit, session-start, compact, rebuild, lint)
-- #far — Full Attention Residuals, управление контекстом, HOT/WARM/COLD
-- #index — индексы и навигация (hub, доменные, двухуровневые)
-- #validation — валидация ссылок, контрактов, тегов (lint-refs, rebuild-index)
+## System
+- #hooks — Claude Code hooks (pre-commit, session-start, compact, rebuild, lint)
+- #far — Full Attention Residuals, context management, HOT/WARM/COLD
+- #index — indexes and navigation (hub, domain, two-level)
+- #validation — link validation, contracts, tags (lint-refs, rebuild-index)
 
-## Процесс
-- #integration — процесс установки, INTEGRATION.md, onboarding
+## Process
+- #integration — installation process, INTEGRATION.md, onboarding

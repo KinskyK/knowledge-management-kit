@@ -1,4 +1,4 @@
 # core
-Решений: 0 | ■ 0 | ◆ 0 | ● 0
+Decisions: 0 | ■ 0 | ◆ 0 | ● 0
 
-Архитектура KM-системы: файловая структура, протоколы, индексы, FAR, хуки.
+KM system architecture: file structure, protocols, indexes, FAR, hooks.
