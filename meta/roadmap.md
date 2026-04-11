@@ -1,25 +1,25 @@
 # Roadmap
 
-## Легенда
-[ ] не начата | [~] начата/заморожена | [v] активна | [x] завершена
+## Legend
+[ ] not started | [~] started/frozen | [v] active | [x] completed
 
-## Стек задач
+## Task Stack
 
-### Глубина 0
+### Depth 0
 
-[v] Документ-карта архитектуры (docs/architecture-map.md) — живой документ, обновляется с каждой новой конструкцией
-[x] Sessions deep dive — научить агента нырять в старые сессионные блоки при недопонимании или споре о контексте решения
-[x] Обязательная секция "Отвергнуто" в ADR — каждое решение хранит отвергнутые альтернативы и причины отказа
-[x] Поведенческие триггеры deep dive — протокол переключения внимания на глубокий слой при пересмотре, конфликте, вопросе "почему"
-### Глубина 1 — GraphRAG-слой (опциональный)
+[v] Architecture map document (docs/architecture-map.md) — living document, updated with each new construct
+[x] Sessions deep dive — teach the agent to dive into old session blocks when there's a misunderstanding or dispute about the context of a decision
+[x] Mandatory "Rejected" section in ADR — each decision stores rejected alternatives and reasons for rejection
+[x] Behavioral deep dive triggers — protocol for switching attention to the deep layer during review, conflict, or "why" questions
+### Depth 1 — GraphRAG Layer (optional)
 
-Стек: LightRAG (insert_custom_kg + hybrid query) + FastEmbed (multilingual-e5-large) + OpenRouter (Gemma 3 12B / Qwen3.6 Plus для merge). Исследование: meta/docs/landscape/graphrag-local-stack.md
+Stack: LightRAG (insert_custom_kg + hybrid query) + FastEmbed (multilingual-e5-large) + OpenRouter (Gemma 3 12B / Qwen3.6 Plus for merge). Research: meta/docs/landscape/graphrag-local-stack.md
 
-[ ] MCP-сервер (~100-150 строк Python): insert_kg, search_knowledge, delete_source, get_graph_stats
-[ ] Интеграция extraction в секретарский протокол: Claude при коммите извлекает тройки → insert_custom_kg
-[ ] Шаблон extraction: стандартизация entity types (decision, concept, problem, domain, mechanism) и relationship types
-[ ] Интеграция query: команда /search через MCP → LightRAG hybrid query (only_need_context=True) → Claude синтезирует ответ
-[ ] Тестирование: dummy LLM vs OpenRouter, качество multilingual-e5-large на RU+EN, латентность при 500 docs
+[ ] MCP server (~100-150 lines Python): insert_kg, search_knowledge, delete_source, get_graph_stats
+[ ] Integration of extraction into the Secretary Protocol: Claude extracts triples on commit → insert_custom_kg
+[ ] Extraction template: standardize entity types (decision, concept, problem, domain, mechanism) and relationship types
+[ ] Query integration: /search command via MCP → LightRAG hybrid query (only_need_context=True) → Claude synthesizes the answer
+[ ] Testing: dummy LLM vs OpenRouter, multilingual-e5-large quality on RU+EN, latency at 500 docs
 
-## Сессионный контекст
-→ meta/sessions.md (отдельный файл; при старте подгружается последний блок)
+## Session Context
+→ meta/sessions.md (separate file; on start, the latest block is loaded)

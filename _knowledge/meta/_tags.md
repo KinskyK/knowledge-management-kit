@@ -1,3 +1,3 @@
-# Словарь хештегов
+# Tag Dictionary
 
-Общий для meta/decisions/ и meta/docs/. Новый тег → сначала добавь сюда + обоснуй.
+Shared across meta/decisions/ and meta/docs/. New tag → add here first + justify.

@@ -1,4 +1,4 @@
 # Project Manifest
 
-> Карта файловой структуры проекта. Загружается по запросу.
-> Заполняется при установке и обновляется при структурных изменениях.
+> Project file structure map. Loaded on demand.
+> Filled during installation and updated on structural changes.

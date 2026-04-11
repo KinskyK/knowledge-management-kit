@@ -1,12 +1,12 @@
 # Decisions Hub
-Решений: 0 | ■ 0 | ◆ 0 | ● 0
-Доменные индексы: meta/decisions/{domain}/_index.md
+Decisions: 0 | ■ 0 | ◆ 0 | ● 0
+Domain indexes: meta/decisions/{domain}/_index.md
 
-Легенда: ■ АКСИОМА | ◆ ПРАВИЛО | ● ГИПОТЕЗА
+Legend: ■ AXIOM | ◆ RULE | ● HYPOTHESIS
 
-## Домены
-| Домен | Решений | Статистика | Описание |
-|-------|---------|------------|----------|
+## Domains
+| Domain | Decisions | Statistics | Description |
+|--------|-----------|------------|-------------|
 
-## ⚠ Триггеры пересмотра
-(пока пусто)
+## Review Triggers
+(empty for now)

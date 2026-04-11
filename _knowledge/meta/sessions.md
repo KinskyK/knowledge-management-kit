@@ -1,15 +1,15 @@
-# Сессионный контекст
+# Session Context
 
-Правило: слияние блоков, не перезапись. Каждая сессия — отдельный блок.
-Старые блоки → просматривать, поглощённое убирать.
+Rule: merge blocks, don't overwrite. Each session is a separate block.
+Old blocks → review, remove absorbed content.
 
-**Deep dive:** это архив с глубиной. При недопонимании или споре о контексте — читай ранние блоки, ищи по строке `Темы:`.
+**Deep dive:** this is an archive with depth. When there's a misunderstanding or dispute about context — read earlier blocks, search by the `Topics:` line.
 
-Формат блока:
+Block format:
 ```
-### Сессия YYYY-MM-DD — краткая тема
-Темы: ключевое-слово-1, ключевое-слово-2
-- что обсуждали
-- что решили
-- что осталось открытым
+### Session YYYY-MM-DD — brief topic
+Topics: keyword-1, keyword-2
+- what was discussed
+- what was decided
+- what remains open
 ```

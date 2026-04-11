@@ -1,191 +1,191 @@
 # Integration — Knowledge Management Kit
 
-> Этот файл читает Claude при установке. Пользователь даёт промпт:
-> "Прочитай _knowledge/INTEGRATION.md и выполни интеграцию. Веди меня по шагам."
+> This file is read by Claude during installation. The user gives the prompt:
+> "Read _knowledge/INTEGRATION.md and perform the integration. Guide me through the steps."
 
-## Шаг 0: Проверка Git
+## Step 0: Git Check
 
-Проверь: инициализирован ли git в проекте?
+Check: is git initialized in the project?
 
 ```bash
 git rev-parse --git-dir 2>/dev/null
 ```
 
-**Если git не инициализирован (команда вернула ошибку):**
+**If git is not initialized (command returned an error):**
 
-Скажи пользователю: "В проекте не инициализирован git. Система управления знаниями использует git для хранения истории и автоматических хуков. Инициализирую? (да/нет)"
+Tell the user: "Git is not initialized in the project. The knowledge management system uses git for history tracking and automatic hooks. Initialize? (yes/no)"
 
-Если да:
+If yes:
 ```bash
 git init
 ```
 
-Перед первым коммитом проверь: нет ли чувствительных файлов (.env, credentials, ключи API, большие бинарники). Если есть — сначала создай .gitignore:
+Before the first commit, check: are there sensitive files (.env, credentials, API keys, large binaries)? If so — create .gitignore first:
 ```bash
 echo ".env" >> .gitignore
 echo "*.key" >> .gitignore
 echo "*.pem" >> .gitignore
 ```
 
-Потом:
+Then:
 ```bash
 git add -A
 git commit -m "initial commit"
 ```
 
-Если нет — предупреди: "Без git хуки (секретарский протокол, восстановление контекста, автозахват) не будут работать. Файловая структура установится, но автоматизация будет отключена."
+If no — warn: "Without git, hooks (Secretary Protocol, context recovery, auto-capture) will not work. The file structure will be installed, but automation will be disabled."
 
-**Если git уже инициализирован** — переходи к Шагу 1.
+**If git is already initialized** — proceed to Step 1.
 
-## Шаг 1: Интервью
+## Step 1: Interview
 
-Спроси у пользователя (по одному вопросу за раз):
+Ask the user (one question at a time):
 
-1. **Название проекта** — как называется проект? (пример: "my-web-app", "trading-bot")
-2. **Описание** — одно предложение: что делает проект? (пример: "Веб-приложение для управления задачами")
-3. **Фаза** — на какой стадии? (пример: "прототип", "разработка", "production")
-4. **Домены решений** — какие основные области? (пример: "backend, frontend" или "core, api, database"). Минимум 1 домен. Claude может предложить домены на основе описания.
-5. **Домены исследований** — какие темы для ресёрча? (пример: "architecture, performance" или ""). Можно пропустить.
+1. **Project name** — what is the project called? (example: "my-web-app", "trading-bot")
+2. **Description** — one sentence: what does the project do? (example: "A web application for task management")
+3. **Phase** — what stage is it at? (example: "prototype", "development", "production")
+4. **Decision domains** — what are the main areas? (example: "backend, frontend" or "core, api, database"). Minimum 1 domain. Claude can suggest domains based on the description.
+5. **Research domains** — what topics for research? (example: "architecture, performance" or ""). Can be skipped.
 
-## Шаг 2: Проверка существующего CLAUDE.md
+## Step 2: Check Existing CLAUDE.md
 
-Проверь: есть ли уже CLAUDE.md в корне проекта?
+Check: does CLAUDE.md already exist in the project root?
 
-**Если есть:**
-- Прочитай его
-- Сохрани существующее содержимое
-- В Шаге 3 объедини: добавь секцию "Модель проекта" из шаблона, сохрани существующие правила пользователя
-- Спроси пользователя: "У тебя уже есть CLAUDE.md. Я объединю его с системой управления знаниями. Ок?"
+**If it exists:**
+- Read it
+- Preserve existing content
+- In Step 3, merge: add the "Project Model" section from the template, keep existing user rules
+- Ask the user: "You already have a CLAUDE.md. I'll merge it with the knowledge management system. OK?"
 
-**Если нет:**
-- Создадим с нуля из шаблона
+**If not:**
+- Create from scratch using the template
 
-## Шаг 3: Генерация файлов
+## Step 3: File Generation
 
-Используй ответы из интервью для заполнения шаблонов.
+Use interview answers to fill in templates.
 
 ### 3.1 CLAUDE.md
 
-Прочитай `_knowledge/CLAUDE.md.template`. Замени:
-- `{{PROJECT_NAME}}` → название проекта
-- `{{PROJECT_DESCRIPTION}}` → напиши brief о проекте пользователя, следуя 8 принципам из HTML-комментария в шаблоне. Не копируй ответ пользователя дословно — напиши ориентировку для нового агента.
-- `{{PROJECT_PHASE}}` → фаза
+Read `_knowledge/CLAUDE.md.template`. Replace:
+- `{{PROJECT_NAME}}` → project name
+- `{{PROJECT_DESCRIPTION}}` → write a brief about the user's project, following the 8 principles from the HTML comment in the template. Don't copy the user's answer verbatim — write an orientation for a new agent.
+- `{{PROJECT_PHASE}}` → phase
 
-Если CLAUDE.md уже существует:
-- Вставь секцию "## Модель проекта" из шаблона в начало
-- Вставь секции "## Инициализация", "## Правила", "## Knowledge Management", "## FAR-протокол" после
-- Сохрани все существующие секции пользователя, которых нет в шаблоне
+If CLAUDE.md already exists:
+- Insert the "## Project Model" section from the template at the beginning
+- Insert sections "## Initialization", "## Rules", "## Knowledge Management", "## FAR Protocol" after
+- Keep all existing user sections that are not in the template
 
-Записать файл: `CLAUDE.md` (в корень проекта)
+Write file: `CLAUDE.md` (to project root)
 
-### 3.2 Структура meta/
+### 3.2 meta/ Structure
 
-Создай директории:
+Create directories:
 ```bash
 mkdir -p meta/decisions meta/docs meta/drafts
 ```
 
-Для каждого домена решений из интервью:
+For each decision domain from the interview:
 ```bash
 mkdir -p meta/decisions/{{domain_name}}
 ```
 
-Для каждого домена исследований (если указаны):
+For each research domain (if specified):
 ```bash
 mkdir -p meta/docs/{{topic_name}}
 ```
 
-### 3.3 Проверка конфликтов
+### 3.3 Conflict Check
 
-Перед копированием проверь:
+Before copying, check:
 
-**Если `meta/` уже существует:** спроси пользователя "Директория meta/ уже есть. Можно использовать её для системы управления знаниями? (да/нет)". Если нет — предложить альтернативное имя.
+**If `meta/` already exists:** ask the user "Directory meta/ already exists. Can it be used for the knowledge management system? (yes/no)". If no — suggest an alternative name.
 
-**Если `.claude/hooks/` уже содержит файлы:** покажи список существующих файлов. Спроси "Перезаписать существующие хуки? (да/нет)". Если нет — пропустить копирование хуков и показать инструкцию для ручной интеграции.
+**If `.claude/hooks/` already contains files:** show the list of existing files. Ask "Overwrite existing hooks? (yes/no)". If no — skip hook copying and show instructions for manual integration.
 
-### 3.4 Копирование файлов без изменений
+### 3.4 Copy Files Without Changes
 
-Скопируй из `_knowledge/` в корень проекта:
-- `Full Attention Residuals.md` → корень
+Copy from `_knowledge/` to the project root:
+- `Full Attention Residuals.md` → root
 - `agents/AGENT_PROTOCOL.md` → `agents/`
 - `meta/roadmap.md` → `meta/`
 - `meta/sessions.md` → `meta/`
 - `meta/project_manifest.md` → `meta/`
 - `meta/drafts/.gitkeep` → `meta/drafts/`
-- `.claude/hooks/*` → `.claude/hooks/` (все 7 хуков)
-- `.claude/commands/*` → `.claude/commands/` (все 8 команд)
+- `.claude/hooks/*` → `.claude/hooks/` (all 7 hooks)
+- `.claude/commands/*` → `.claude/commands/` (all 8 commands)
 - `.claude/scripts/context.py` → `.claude/scripts/`
 - `templates/extraction-template.json` → `templates/`
 
-### 3.5 Генерация индексов
+### 3.5 Index Generation
 
-**meta/_tags.md** — создай с доменами из интервью:
+**meta/_tags.md** — create with domains from the interview:
 ```markdown
-# Словарь хештегов
+# Tag Dictionary
 
-Общий для meta/decisions/ и meta/docs/. Новый тег → сначала добавь сюда + обоснуй.
+Shared across meta/decisions/ and meta/docs/. New tag → add here first + justify.
 
-## Система
-(пока пусто — теги появятся с первыми решениями)
+## System
+(empty for now — tags will appear with the first decisions)
 ```
 
-**meta/decisions/_index.md** — hub с доменами из интервью:
+**meta/decisions/_index.md** — hub with domains from the interview:
 ```markdown
 # Decisions Hub
-Решений: 0 | ■ 0 | ◆ 0 | ● 0
-Доменные индексы: meta/decisions/{domain}/_index.md
+Decisions: 0 | ■ 0 | ◆ 0 | ● 0
+Domain indexes: meta/decisions/{domain}/_index.md
 
-Легенда: ■ АКСИОМА | ◆ ПРАВИЛО | ● ГИПОТЕЗА
+Legend: ■ AXIOM | ◆ RULE | ● HYPOTHESIS
 
-## Домены
-| Домен | Решений | Статистика | Описание |
-|-------|---------|------------|----------|
-| {{domain1}} | 0 | ■ 0 ◆ 0 ● 0 | {{описание1}} |
-| {{domain2}} | 0 | ■ 0 ◆ 0 ● 0 | {{описание2}} |
+## Domains
+| Domain | Decisions | Statistics | Description |
+|--------|-----------|------------|-------------|
+| {{domain1}} | 0 | ■ 0 ◆ 0 ● 0 | {{description1}} |
+| {{domain2}} | 0 | ■ 0 ◆ 0 ● 0 | {{description2}} |
 
-## ⚠ Триггеры пересмотра
-(пока пусто)
+## Review Triggers
+(empty for now)
 ```
 
-Для каждого домена — **meta/decisions/{{domain}}/_index.md**:
+For each domain — **meta/decisions/{{domain}}/_index.md**:
 ```markdown
 # {{domain}}
-Решений: 0 | ■ 0 | ◆ 0 | ● 0
+Decisions: 0 | ■ 0 | ◆ 0 | ● 0
 ```
 
 **meta/docs/_index.md** — hub:
 ```markdown
-# Карта исследований
+# Research Map
 
-Правило: перед ответом на вопрос по теме — прочитай файл. Не отвечай по памяти.
-Доменные индексы: meta/docs/{topic}/_index.md
+Rule: before answering a question on a topic — read the file. Don't answer from memory.
+Domain indexes: meta/docs/{topic}/_index.md
 
-## Темы
-| Тема | Документов | Описание |
-|------|------------|----------|
+## Topics
+| Topic | Documents | Description |
+|-------|-----------|-------------|
 ```
 
-Для каждого домена исследований — **meta/docs/{{topic}}/_index.md**:
+For each research domain — **meta/docs/{{topic}}/_index.md**:
 ```markdown
-# Документация: {{topic}}
-Документов: 0
+# Documentation: {{topic}}
+Documents: 0
 ```
 
-### 3.6 Настройка хуков (.claude/settings.local.json)
+### 3.6 Hook Configuration (.claude/settings.local.json)
 
-Прочитай `_knowledge/.claude/settings.local.json.template`.
+Read `_knowledge/.claude/settings.local.json.template`.
 
-**Если `.claude/settings.local.json` уже существует:**
-- Прочитай его
-- Объедини: добавь хуки из шаблона в существующий блок "hooks". Не затирай существующие хуки пользователя.
-- Если хук с тем же событием уже есть — добавь наш в массив hooks, не заменяй.
+**If `.claude/settings.local.json` already exists:**
+- Read it
+- Merge: add hooks from the template into the existing "hooks" block. Don't overwrite existing user hooks.
+- If a hook with the same event already exists — add ours to the hooks array, don't replace.
 
-**Если не существует:**
-- Скопируй шаблон как есть, убрав ".template" из имени.
+**If it doesn't exist:**
+- Copy the template as-is, removing ".template" from the name.
 
 ### 3.7 .gitignore
 
-Добавь в `.gitignore` (создай если нет):
+Add to `.gitignore` (create if missing):
 ```
 .claude/settings.local.json
 .graphrag/data/
@@ -193,51 +193,51 @@ mkdir -p meta/docs/{{topic_name}}
 meta/drafts/*.md
 ```
 
-## Шаг 4: Обновление манифеста
+## Step 4: Update Manifest
 
-Заполни `meta/project_manifest.md` актуальной структурой файлов проекта.
+Fill `meta/project_manifest.md` with the current file structure of the project.
 
-## Шаг 5: Проверка
+## Step 5: Verification
 
-Проверь что все файлы созданы ПЕРЕД удалением _knowledge/. Если что-то отсутствует — сообщи пользователю и НЕ удаляй _knowledge/.
+Check that all files are created BEFORE deleting _knowledge/. If something is missing — inform the user and DO NOT delete _knowledge/.
 
-Выведи краткий итог:
+Output a brief summary:
 ```
-✓ CLAUDE.md — модель проекта + правила
-✓ meta/decisions/ — {{N}} доменов
-✓ meta/docs/ — {{M}} тем
-✓ meta/roadmap.md — стек задач
-✓ meta/sessions.md — сессионный контекст
-✓ meta/drafts/ — буфер автозахвата
-✓ .claude/hooks/ — 7 хуков
-✓ .claude/commands/ — 8 команд
-✓ Full Attention Residuals.md — спецификация FAR
-✓ agents/AGENT_PROTOCOL.md — протокол агента
+✓ CLAUDE.md — project model + rules
+✓ meta/decisions/ — {{N}} domains
+✓ meta/docs/ — {{M}} topics
+✓ meta/roadmap.md — task stack
+✓ meta/sessions.md — session context
+✓ meta/drafts/ — auto-capture buffer
+✓ .claude/hooks/ — 7 hooks
+✓ .claude/commands/ — 8 commands
+✓ Full Attention Residuals.md — FAR specification
+✓ agents/AGENT_PROTOCOL.md — agent protocol
 
-Если всё ✓ — переходи к Шагу 6.
-Если что-то ✗ — сообщи пользователю, НЕ удаляй _knowledge/, попробуй исправить.
+If all ✓ — proceed to Step 6.
+If anything ✗ — inform the user, DO NOT delete _knowledge/, try to fix.
 ```
 
-## Шаг 6: Удаление _knowledge/
+## Step 6: Delete _knowledge/
 
-Только после успешной проверки в Шаге 5:
+Only after successful verification in Step 5:
 
 ```bash
 rm -rf _knowledge/
 ```
 
-Скажи пользователю: "Папка _knowledge/ удалена. Система установлена."
+Tell the user: "The _knowledge/ folder has been deleted. The system is installed."
 
 ```
-Следующие шаги:
-- Начни работу. Система активна.
-- При первом коммите сработает секретарский протокол.
-- Для семантического поиска (опционально): /graphrag init
+Next steps:
+- Start working. The system is active.
+- On the first commit, the Secretary Protocol will trigger.
+- For semantic search (optional): /graphrag init
 ```
 
-## Шаг 7: GraphRAG (опционально)
+## Step 7: GraphRAG (optional)
 
-Спроси: "Хочешь подключить GraphRAG — семантический поиск + граф знаний? (да/нет)"
+Ask: "Would you like to connect GraphRAG — semantic search + knowledge graph? (yes/no)"
 
-Если да → "Запусти `/graphrag init` — он проведёт через настройку."
-Если нет → "Можешь подключить позже командой `/graphrag init`."
+If yes → "Run `/graphrag init` — it will guide you through the setup."
+If no → "You can connect it later with the `/graphrag init` command."

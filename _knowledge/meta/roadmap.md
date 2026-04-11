@@ -1,11 +1,11 @@
 # Roadmap
 
-## Легенда
-[ ] не начата | [~] начата/заморожена | [v] активна | [x] завершена
+## Legend
+[ ] not started | [~] started/frozen | [v] active | [x] completed
 
-## Стек задач
+## Task Stack
 
-### Глубина 0
+### Depth 0
 
-## Сессионный контекст
-→ meta/sessions.md (отдельный файл; при старте подгружается последний блок)
+## Session Context
+→ meta/sessions.md (separate file; on start, the latest block is loaded)
