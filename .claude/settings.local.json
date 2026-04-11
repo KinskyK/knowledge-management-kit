@@ -1,0 +1,90 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash -n .claude/hooks/session-start-recovery.sh)",
+      "Bash(bash -n .claude/hooks/post-compact-reload.sh)",
+      "Bash(bash -n .claude/hooks/pre-commit-secretary.sh)",
+      "Bash(bash -n .claude/hooks/pre-compact-handoff.sh)",
+      "Bash(grep -i \"vps\\\\|server config\\\\|deployment\\\\|production\" /Users/k_pesterev/.claude/projects/-Users-k-pesterev-Documents-Vestiga/*.jsonl)",
+      "Bash(grep -i \"ram\\\\|cpu\\\\|gb\\\\|2gb\\\\|4gb\\\\|8gb\" /Users/k_pesterev/.claude/projects/-Users-k-pesterev-Documents-Vestiga/*.jsonl)",
+      "Bash(find:*)",
+      "Bash(unzip -l /Users/k_pesterev/Downloads/Vestiga_Start.zip)",
+      "Bash(unzip -t /Users/k_pesterev/Downloads/Vestiga_Start.zip)",
+      "Bash(unzip:*)",
+      "Bash(cat /Users/k_pesterev/.claude/projects/-Users-k-pesterev-Documents-Vestiga/memory/*)",
+      "WebFetch(domain:qdrant.github.io)",
+      "WebFetch(domain:sider.ai)",
+      "WebFetch(domain:neo4j.com)",
+      "WebFetch(domain:hub.docker.com)",
+      "Bash(curl -s \"https://api.github.com/search/code?q=insert_custom_kg+repo:HKUDS/LightRAG\")",
+      "Bash(curl -s \"https://api.github.com/search/code?q=insert_custom_kg+repo:desimpkins/daniel-lightrag-mcp\")",
+      "Bash(curl -sH \"Accept: application/vnd.github+json\" \"https://api.github.com/search/code?q=insert_custom+repo:HKUDS/LightRAG\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/.claude/hooks/pre-commit-secretary.sh)",
+      "WebFetch(domain:docs.basicmemory.com)",
+      "WebFetch(domain:claude-pilot.com)",
+      "WebFetch(domain:milvus.io)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(date -j -f \"%Y-%m-%d\" \"2025-03-01\" +%s)",
+      "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/.claude/hooks/session-end-capture.sh)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-commit-secretary.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-compact-handoff.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-compact-reload.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start-recovery.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-end-capture.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
