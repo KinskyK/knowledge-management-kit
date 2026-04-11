@@ -52,6 +52,22 @@ if [ -f "$SESSIONS" ]; then
   fi
 fi
 
+# --- Check 4: Pending drafts ---
+DRAFTS_DIR="meta/drafts"
+if [ -d "$DRAFTS_DIR" ]; then
+  DRAFT_COUNT=$(find "$DRAFTS_DIR" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$DRAFT_COUNT" -gt 0 ]; then
+    OUTPUT="${OUTPUT}\n📝 Необработанных черновиков: ${DRAFT_COUNT} в meta/drafts/\n"
+    OUTPUT="${OUTPUT}Оформи в ADR/sessions при следующем коммите.\n"
+
+    # Warn if drafts are older than 7 days
+    OLD_DRAFTS=$(find "$DRAFTS_DIR" -maxdepth 1 -name "*.md" -mtime +7 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$OLD_DRAFTS" -gt 0 ]; then
+      OUTPUT="${OUTPUT}⚠ Из них ${OLD_DRAFTS} старше 7 дней — возможно, уже неактуальны.\n"
+    fi
+  fi
+fi
+
 if [ -n "$OUTPUT" ]; then
   echo ""
   echo -e "$OUTPUT"
