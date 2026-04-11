@@ -94,11 +94,9 @@ ADR-формат:
 
 ## Навигация по spoke-файлам
 
-| Spoke | Файл | Содержание |
-|---|---|---|
-| Пайплайны | agents/pipelines.md | Пайплайны, HRT, loop-back |
-| Специалисты | agents/specialists.md | Детальные протоколы специалистов |
-| Контекст | agents/context-packages.md | Zone/Specialist load, маршрутизация |
-| Верификация | agents/verification.md | Верификация, self-assessment, арбитраж |
+Spoke-файлы создаются по мере роста проекта. Начинай с этого hub-файла, выноси в spoke когда hub становится перегружен. Примеры возможных spoke:
 
-<!-- Spoke-файлы создаются по мере роста проекта. Начинай с hub-файла, выноси в spoke когда hub становится перегружен. -->
+- agents/pipelines.md — пайплайны, HRT, loop-back
+- agents/specialists.md — детальные протоколы специалистов
+- agents/context-packages.md — Zone/Specialist load, маршрутизация
+- agents/verification.md — верификация, self-assessment, арбитраж

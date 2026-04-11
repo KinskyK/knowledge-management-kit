@@ -10,21 +10,35 @@ If it does -- ask: "GraphRAG already configured. Reinitialize? (yes/no)"
 
 If the user says no -- stop.
 
-### Step 2: Install dependencies
+### Step 2: Download and install GraphRAG server
 
-Check if `graphrag_mcp/.venv` exists:
-
-```bash
-ls graphrag_mcp/.venv/bin/python3 2>/dev/null
-```
-
-If it does not exist, create the venv and install dependencies:
+Check if `graphrag_mcp/` directory exists:
 
 ```bash
-cd graphrag_mcp && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+ls graphrag_mcp/requirements.txt 2>/dev/null
 ```
 
-Tell the user: "Installing dependencies. On first run, the embedding model (~2.2 GB) will be downloaded -- this will take a few minutes."
+If it does NOT exist — download it from the repository:
+
+```bash
+TEMP_DIR=$(mktemp -d)
+if git clone --depth 1 --filter=blob:none --sparse https://github.com/KinskyK/knowledge-management-kit.git "$TEMP_DIR" 2>/dev/null; then
+  cd "$TEMP_DIR" && git sparse-checkout set graphrag_mcp && cd -
+  cp -r "$TEMP_DIR/graphrag_mcp" .
+  rm -rf "$TEMP_DIR"
+else
+  rm -rf "$TEMP_DIR"
+  echo "Failed to download graphrag_mcp/. Please clone it manually from https://github.com/KinskyK/knowledge-management-kit"
+fi
+```
+
+Then install dependencies:
+
+```bash
+cd graphrag_mcp && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cd ..
+```
+
+Tell the user: "Installing dependencies. On first run, the embedding model (~2.2 GB) will be downloaded — this will take a few minutes."
 
 ### Step 3: Configure
 

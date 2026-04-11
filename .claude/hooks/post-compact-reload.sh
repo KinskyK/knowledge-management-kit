@@ -8,6 +8,13 @@
 cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || exit 0
 
 [ ! -f "meta/roadmap.md" ] && exit 0
+
+# Check python3 availability
+if ! command -v python3 &>/dev/null; then
+  echo '{"systemMessage": "⚠️ python3 not found. Post-compact context reload requires python3. Install it or context will not be restored after compaction."}'
+  exit 0
+fi
+
 SESSIONS=""
 [ -f "meta/sessions.md" ] && SESSIONS="meta/sessions.md"
 

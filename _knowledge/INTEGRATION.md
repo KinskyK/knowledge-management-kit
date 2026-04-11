@@ -18,6 +18,17 @@ git rev-parse --git-dir 2>/dev/null
 Если да:
 ```bash
 git init
+```
+
+Перед первым коммитом проверь: нет ли чувствительных файлов (.env, credentials, ключи API, большие бинарники). Если есть — сначала создай .gitignore:
+```bash
+echo ".env" >> .gitignore
+echo "*.key" >> .gitignore
+echo "*.pem" >> .gitignore
+```
+
+Потом:
+```bash
 git add -A
 git commit -m "initial commit"
 ```
@@ -102,7 +113,7 @@ mkdir -p meta/docs/{{topic_name}}
 - `meta/project_manifest.md` → `meta/`
 - `meta/drafts/.gitkeep` → `meta/drafts/`
 - `.claude/hooks/*` → `.claude/hooks/` (все 7 хуков)
-- `.claude/commands/*` → `.claude/commands/` (все 7 команд)
+- `.claude/commands/*` → `.claude/commands/` (все 8 команд)
 - `.claude/scripts/context.py` → `.claude/scripts/`
 - `templates/extraction-template.json` → `templates/`
 
@@ -199,7 +210,7 @@ meta/drafts/*.md
 ✓ meta/sessions.md — сессионный контекст
 ✓ meta/drafts/ — буфер автозахвата
 ✓ .claude/hooks/ — 7 хуков
-✓ .claude/commands/ — 7 команд
+✓ .claude/commands/ — 8 команд
 ✓ Full Attention Residuals.md — спецификация FAR
 ✓ agents/AGENT_PROTOCOL.md — протокол агента
 

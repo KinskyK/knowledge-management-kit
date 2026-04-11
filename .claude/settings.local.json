@@ -33,7 +33,9 @@
       "Bash(bash -n .claude/hooks/session-end-capture.sh)",
       "Bash(ls:*)",
       "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/install.sh)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(xargs -I{} basename {})",
+      "Bash(echo \"---EXIT: $?\")"
     ]
   },
   "hooks": {
