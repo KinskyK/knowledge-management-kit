@@ -34,9 +34,8 @@
 
 Прочитай `_knowledge/CLAUDE.md.template`. Замени:
 - `{{PROJECT_NAME}}` → название проекта
-- `{{PROJECT_DESCRIPTION}}` → описание
+- `{{PROJECT_DESCRIPTION}}` → напиши brief о проекте пользователя, следуя 8 принципам из HTML-комментария в шаблоне. Не копируй ответ пользователя дословно — напиши ориентировку для нового агента.
 - `{{PROJECT_PHASE}}` → фаза
-- `{{DECISION_DOMAINS}}` → описание доменов (перечисление)
 
 Если CLAUDE.md уже существует:
 - Вставь секцию "## Модель проекта" из шаблона в начало
@@ -84,7 +83,7 @@ mkdir -p meta/docs/{{topic_name}}
 - `.claude/scripts/context.py` → `.claude/scripts/`
 - `templates/extraction-template.json` → `templates/`
 
-### 3.4 Генерация индексов
+### 3.5 Генерация индексов
 
 **meta/_tags.md** — создай с доменами из интервью:
 ```markdown
@@ -138,7 +137,7 @@ mkdir -p meta/docs/{{topic_name}}
 Документов: 0
 ```
 
-### 3.5 Настройка хуков (.claude/settings.local.json)
+### 3.6 Настройка хуков (.claude/settings.local.json)
 
 Прочитай `_knowledge/.claude/settings.local.json.template`.
 
@@ -150,7 +149,7 @@ mkdir -p meta/docs/{{topic_name}}
 **Если не существует:**
 - Скопируй шаблон как есть, убрав ".template" из имени.
 
-### 3.6 .gitignore
+### 3.7 .gitignore
 
 Добавь в `.gitignore` (создай если нет):
 ```
