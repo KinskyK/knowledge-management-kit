@@ -163,6 +163,77 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════
+# F. Устаревшие триггеры пересмотра
+# ═══════════════════════════════════════════
+echo "F. Устаревшие триггеры пересмотра"
+
+HUB="meta/decisions/_index.md"
+if [ -f "$HUB" ]; then
+  while IFS= read -r line; do
+    # Extract CODE from ⚠ lines
+    CODE=$(echo "$line" | grep -oE '[A-Z][A-Za-z0-9_-]*-[0-9]+' | head -1)
+    if [ -n "$CODE" ]; then
+      # Find the ADR file
+      ADR_FILE=$(find meta/decisions -name "${CODE}.md" 2>/dev/null | head -1)
+      if [ -n "$ADR_FILE" ] && [ -f "$ADR_FILE" ]; then
+        # Check last modification (git)
+        LAST_MOD=$(git log -1 --format="%ci" -- "$ADR_FILE" 2>/dev/null | cut -d' ' -f1)
+        if [ -n "$LAST_MOD" ]; then
+          DAYS_AGO=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$LAST_MOD" +%s 2>/dev/null || date -d "$LAST_MOD" +%s 2>/dev/null || echo 0)) / 86400 ))
+          if [ "$DAYS_AGO" -gt 30 ]; then
+            warn "$CODE: триггер ⚠ в hub, но файл не обновлялся ${DAYS_AGO} дней"
+          fi
+        fi
+      fi
+    fi
+  done < <(grep "⚠" "$HUB" 2>/dev/null)
+fi
+
+echo ""
+
+# ═══════════════════════════════════════════
+# G. Сиротские ADR (нет входящих/исходящих ссылок)
+# ═══════════════════════════════════════════
+# NOTE: O(n^2) — acceptable for <100 ADR files. For larger projects, consider caching refs.
+echo "G. Сиротские ADR (нет ссылок)"
+
+for f in meta/decisions/*/*.md; do
+  [ -f "$f" ] || continue
+  bn=$(basename "$f")
+  case "$bn" in _index.md|_tags.md) continue ;; esac
+
+  CODE=$(head -1 "$f" | sed 's/^# \([^ ]*\).*/\1/')
+  [ -z "$CODE" ] && continue
+
+  # Skip drafts
+  grep -q "Статус.*draft" "$f" 2>/dev/null && continue
+
+  # Check if this CODE is referenced by any OTHER ADR file
+  HAS_INCOMING=false
+  for other in meta/decisions/*/*.md; do
+    [ "$other" = "$f" ] && continue
+    [ -f "$other" ] || continue
+    case "$(basename "$other")" in _index.md|_tags.md) continue ;; esac
+    if grep -q "\[\[$CODE\]\]" "$other" 2>/dev/null; then
+      HAS_INCOMING=true
+      break
+    fi
+  done
+
+  # Check if this file references any other CODE
+  HAS_OUTGOING=false
+  if grep -q '\[\[[A-Z]' "$f" 2>/dev/null; then
+    HAS_OUTGOING=true
+  fi
+
+  if [ "$HAS_INCOMING" = false ] && [ "$HAS_OUTGOING" = false ]; then
+    warn "$CODE ($f): нет ни входящих, ни исходящих ссылок [[CODE]]"
+  fi
+done
+
+echo ""
+
+# ═══════════════════════════════════════════
 # Итог
 # ═══════════════════════════════════════════
 echo "═══════════════════════════════"
