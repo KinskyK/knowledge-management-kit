@@ -26,7 +26,12 @@
       "WebFetch(domain:milvus.io)",
       "Bash(echo \"exit: $?\")",
       "Bash(date -j -f \"%Y-%m-%d\" \"2025-03-01\" +%s)",
-      "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/.claude/hooks/session-end-capture.sh)"
+      "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/.claude/hooks/session-end-capture.sh)",
+      "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/.claude/hooks/pre-compact-handoff.sh)",
+      "Bash(bash -n /Users/k_pesterev/Documents/Projects/knowledge-management-kit/.claude/hooks/session-start-recovery.sh)",
+      "Bash(bash -n .claude/hooks/lint-refs.sh)",
+      "Bash(bash -n .claude/hooks/session-end-capture.sh)",
+      "Bash(ls:*)"
     ]
   },
   "hooks": {
