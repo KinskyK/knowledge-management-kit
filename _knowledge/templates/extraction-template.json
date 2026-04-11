@@ -1,0 +1,29 @@
+{
+  "_doc": "Template for GraphRAG triple extraction. Claude fills this when extracting knowledge from ADR/docs/sessions files.",
+  "_entity_types": ["decision", "concept", "problem", "domain", "mechanism", "file"],
+  "_relationship_types": ["depends-on", "influences", "solves", "part-of", "supersedes", "rejected", "requires", "enables", "contradicts"],
+  "entities": [
+    {
+      "entity_name": "ENTITY_NAME — use canonical form, e.g. 'FAR Protocol' not 'FAR' or 'Full Attention Residuals'",
+      "entity_type": "one of: decision | concept | problem | domain | mechanism | file",
+      "description": "1-2 sentences: what this entity is and why it matters. Include key properties.",
+      "source_id": "relative/path/to/source/file.md"
+    }
+  ],
+  "relationships": [
+    {
+      "src_id": "source entity_name (must match an entity_name exactly)",
+      "tgt_id": "target entity_name (must match an entity_name exactly)",
+      "description": "What is the nature of this relationship? Be specific.",
+      "keywords": "relationship-type, additional-keywords",
+      "weight": 1.0,
+      "source_id": "relative/path/to/source/file.md"
+    }
+  ],
+  "chunks": [
+    {
+      "content": "Full text or key section of the source document. Include enough context for semantic search.",
+      "source_id": "relative/path/to/source/file.md"
+    }
+  ]
+}
