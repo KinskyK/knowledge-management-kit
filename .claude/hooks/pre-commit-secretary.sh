@@ -65,7 +65,22 @@ fi
 
 # Always show secretary checklist
 echo ""
+# Check for unprocessed drafts
+DRAFTS_DIR="meta/drafts"
+DRAFT_COUNT=0
+if [ -d "$DRAFTS_DIR" ]; then
+  DRAFT_COUNT=$(find "$DRAFTS_DIR" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+fi
+
+if [ "$DRAFT_COUNT" -gt 0 ]; then
+  echo "📝 ЧЕРНОВИКИ: $DRAFT_COUNT файлов в meta/drafts/"
+  echo "  Прочитай и используй как основу для пунктов ниже."
+  echo "  После оформления в ADR/sessions — удали обработанные."
+  echo ""
+fi
+
 echo "📋 СЕКРЕТАРСКИЙ ПРОТОКОЛ:"
+echo "  0. Черновики в meta/drafts/ → прочитай, оформи, удали обработанные"
 echo "  1. Провёл ли FAR-аудит? (WARM → sessions.md)"
 echo "  2. Есть ли незаписанные решения? → decisions/ (не забудь секцию Отвергнуто)"
 echo "  3. Есть ли несохранённое исследование? → docs/"
@@ -156,6 +171,30 @@ if [ "$HAS_SESSIONS" = true ] && [ -f "meta/sessions.md" ]; then
   if [ -n "$MISSING_TOPICS" ]; then
     WARNINGS="${WARNINGS}\n⚠ sessions.md: блоки без ключевых слов (строка 'Темы:' после заголовка):${MISSING_TOPICS}"
   fi
+fi
+
+# Validate ADR content: check for Отвергнуто section in changed files
+if [ "$HAS_DECISIONS" = true ]; then
+  MISSING_REJECTED=""
+  for f in $CHANGED; do
+    case "$f" in
+      meta/decisions/*/*.md)
+        bn=$(basename "$f")
+        case "$bn" in _index.md|_tags.md) continue ;; esac
+        if [ -f "$f" ] && ! grep -q "Отвергнуто" "$f" 2>/dev/null; then
+          MISSING_REJECTED="${MISSING_REJECTED}\n  - $f"
+        fi
+        ;;
+    esac
+  done
+  if [ -n "$MISSING_REJECTED" ]; then
+    WARNINGS="${WARNINGS}\n⚠ ADR без секции Отвергнуто (рекомендуется при редактировании):${MISSING_REJECTED}"
+  fi
+fi
+
+# Warn if committing decisions but no drafts exist
+if [ "$DRAFT_COUNT" -eq 0 ] && [ "$HAS_DECISIONS" = true ]; then
+  WARNINGS="${WARNINGS}\n⚠ Коммитишь решения без черновиков обсуждений. Запиши: /draft"
 fi
 
 if [ -n "$WARNINGS" ]; then
