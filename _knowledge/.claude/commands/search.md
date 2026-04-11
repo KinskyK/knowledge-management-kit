@@ -11,10 +11,10 @@ Check if the MCP tool `search_knowledge` is available.
 If it is NOT available -- tell the user:
 
 ```
-GraphRAG не настроен. Запусти /graphrag init для установки.
-Пока можно искать вручную:
-- /context CODE — карта зависимостей решения
-- grep по файлам в meta/decisions/ и meta/docs/
+GraphRAG is not configured. Run /graphrag init to set it up.
+In the meantime, you can search manually:
+- /context CODE -- dependency map for a decision
+- grep through files in meta/decisions/ and meta/docs/
 ```
 
 Stop here.
@@ -42,9 +42,9 @@ Group results by relevance. If the query touches multiple topics, organize by to
 If the search returned nothing useful:
 
 ```
-Ничего не найдено по запросу "$ARGUMENTS".
-Попробуй:
-- Другие формулировки или ключевые слова
-- /graphrag reindex — если файлы менялись и не были проиндексированы
-- /context CODE — прямой поиск по коду решения
+Nothing found for query "$ARGUMENTS".
+Try:
+- Different phrasing or keywords
+- /graphrag reindex -- if files were changed and not indexed
+- /context CODE -- direct lookup by decision code
 ```

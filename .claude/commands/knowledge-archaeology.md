@@ -29,9 +29,9 @@ Find the project directory that matches the current project path. Session files 
 git log --oneline --since="6 months ago" | wc -l
 ```
 
-Tell the user: "Найдено: N сессий Claude Code, M коммитов за 6 месяцев. Начинаю извлечение."
+Tell the user: "Found: N Claude Code sessions, M commits over 6 months. Starting extraction."
 
-If no sessions AND no git history: "Нет истории для анализа. Начни работу и используй секретарский протокол для документирования решений."
+If no sessions AND no git history: "No history to analyze. Start working and use the secretary protocol to document decisions."
 
 ### Step 1.2: Read sessions in chunks
 
@@ -39,10 +39,10 @@ For each session file (chronologically, oldest first):
 
 Read 50 user+assistant message pairs at a time (one chunk). For each chunk, extract:
 
-- **Decisions**: "решили X", "выбрали Y", "будем делать Z", "отказались от W"
-- **Problems found**: "не работает", "сломалось", "баг", "ошибка" → что было и как решили
-- **Approach changes**: "раньше делали X, теперь Y", "переходим на Z"
-- **Technical choices**: библиотеки, архитектура, форматы, протоколы
+- **Decisions**: "decided X", "chose Y", "going with Z", "rejected W"
+- **Problems found**: "doesn't work", "broke", "bug", "error" -> what happened and how it was resolved
+- **Approach changes**: "used to do X, now Y", "switching to Z"
+- **Technical choices**: libraries, architecture, formats, protocols
 
 For each chunk, write a draft to `meta/drafts/`:
 
@@ -50,21 +50,21 @@ Filename: `archaeology-YYYY-MM-DD-NNN.md` where date is from the session and NNN
 
 Format:
 ```
-### Черновик археологии: [сессия от YYYY-MM-DD, часть N]
+### Archaeology draft: [session from YYYY-MM-DD, part N]
 
-#### Решения
-- **[Решение]**: [контекст]. Почему: [причина]. Отвергнуто: [что, если упомянуто].
+#### Decisions
+- **[Decision]**: [context]. Why: [reason]. Rejected: [what, if mentioned].
 
-#### Проблемы
-- **[Проблема]**: [суть] → [решение]
+#### Problems
+- **[Problem]**: [essence] -> [resolution]
 
-#### Изменения подхода
-- **Было:** [X]. **Стало:** [Y]. **Почему:** [причина]
+#### Approach changes
+- **Before:** [X]. **After:** [Y]. **Why:** [reason]
 ```
 
 Skip chunks that contain only code output, tool results, or routine work without decisions. Write draft only if there's at least one decision, problem, or approach change.
 
-After each session file: report "Сессия YYYY-MM-DD: N черновиков из M частей."
+After each session file: report "Session YYYY-MM-DD: N drafts from M parts."
 
 ### Step 1.3: Read git history (if no sessions or as supplement)
 
@@ -83,7 +83,7 @@ Write drafts in same format, filename: `archaeology-git-YYYY-MM-DD.md`.
 
 ### Step 1.4: Report extraction results
 
-"Фаза 1 завершена. Извлечено N черновиков из K сессий и M коммитов."
+"Phase 1 complete. Extracted N drafts from K sessions and M commits."
 
 ## Phase 2: Build Evolution Trees
 
@@ -100,34 +100,34 @@ Read all drafts in chronological order.
 Identify unique decisions/topics across all drafts. Same decision may appear in multiple drafts with different states:
 
 Example:
-- Draft from March: "Решили хранить данные в одном файле"
-- Draft from April: "Перешли на отдельные файлы — один файл стал слишком большим"
-- Draft from May: "Добавили двухуровневые индексы поверх отдельных файлов"
+- Draft from March: "Decided to store data in a single file"
+- Draft from April: "Switched to separate files -- single file became too large"
+- Draft from May: "Added two-level indexes on top of separate files"
 
 This is ONE topic with THREE states → evolution chain.
 
 Group into topics. For each topic, build chronological chain:
 ```
-Topic: "Формат хранения данных"
-v1 (March): один файл
-v2 (April): отдельные файлы → v1 rejected (слишком большой файл)
-v3 (May): отдельные файлы + индексы → v2 extended
+Topic: "Data storage format"
+v1 (March): single file
+v2 (April): separate files -> v1 rejected (file too large)
+v3 (May): separate files + indexes -> v2 extended
 Current: v3
 ```
 
 ### Step 2.3: Identify current state
 
-For each topic, the last entry in the chain is the current decision. Earlier entries are history (Эволюция) and rejected alternatives (Отвергнуто).
+For each topic, the last entry in the chain is the current decision. Earlier entries are history (Evolution) and rejected alternatives (Rejected).
 
 Write consolidated file: `meta/drafts/archaeology-consolidated.md` with all topics and their evolution chains.
 
-Report: "Фаза 2 завершена. Найдено N уникальных решений, из них M прошли эволюцию."
+Report: "Phase 2 complete. Found N unique decisions, M of which went through evolution."
 
 ## Phase 3: Compile ADR Files
 
 ### Step 3.1: Ask about domains
 
-"Перед генерацией ADR: какие домены решений использовать?"
+"Before generating ADRs: which decision domains should be used?"
 
 If `meta/decisions/` already has domain directories — use them.
 If not — suggest domains based on topics found. Ask user to confirm.
@@ -147,27 +147,27 @@ Code assignment: `{{DOMAIN_PREFIX}}-01`, `{{DOMAIN_PREFIX}}-02`, etc. Uppercase 
 
 ADR format (from AGENT_PROTOCOL.md):
 ```
-# {{CODE}} — {{название}}
+# {{CODE}} — {{title}}
 
-#{{теги}}
+#{{tags}}
 
-- **Зависит от**: [[коды]] (if dependencies found in history)
-- **Влияет на**: [[коды]] (if impacts found)
-- **Решение**: [текущее состояние — v3 from evolution chain]
-- **Почему**: [обоснование из истории]
-- **Пересмотреть если**: [условия, если очевидны из контекста]
-- **Статус**: accepted ◆ ПРАВИЛО
+- **Depends on**: [[codes]] (if dependencies found in history)
+- **Influences**: [[codes]] (if impacts found)
+- **Decision**: [current state -- v3 from evolution chain]
+- **Why**: [rationale from history]
+- **Reconsider if**: [conditions, if obvious from context]
+- **Status**: accepted ◆ RULE
 
-**Отвергнуто:**
-- [v1/v2 from evolution chain — что пробовали и почему отказались]
+**Rejected:**
+- [v1/v2 from evolution chain -- what was tried and why it was abandoned]
 
-**Эволюция v1→vN:**
-- v1 (дата): [что было]
-- v2 (дата): [что изменилось и почему]
+**Evolution v1->vN:**
+- v1 (date): [what it was]
+- v2 (date): [what changed and why]
 - ...current
 ```
 
-If the decision never changed (no evolution): skip Эволюция section, include Отвергнуто only if alternatives were discussed.
+If the decision never changed (no evolution): skip Evolution section, include Rejected only if alternatives were discussed.
 
 ### Step 3.3: Update indexes
 
@@ -179,25 +179,25 @@ Update `meta/_tags.md` if new tags were created.
 
 ### Step 3.4: Report
 
-"Фаза 3 завершена. Сгенерировано N ADR-файлов в M доменах."
+"Phase 3 complete. Generated N ADR files in M domains."
 
 ## Phase 4: Optional Review
 
 ### Step 4.1: Ask user
 
-"Сгенерировано N решений. Хочешь просмотреть каждое? (да — покажу по одному, нет — всё готово, можешь просмотреть в meta/decisions/)"
+"Generated N decisions. Want to review each one? (yes -- I'll show them one by one, no -- all done, you can review them in meta/decisions/)"
 
 ### Step 4.2: If yes — review each
 
 For each ADR file:
 - Show content
-- Ask: "Верно? (да / исправить / удалить)"
-- If "исправить" — ask what to change, update file
-- If "удалить" — remove file, update index
+- Ask: "Correct? (yes / fix / delete)"
+- If "fix" -- ask what to change, update file
+- If "delete" -- remove file, update index
 
 ### Step 4.3: If no — done
 
-"Все файлы сохранены в meta/decisions/. Просмотри когда будет время."
+"All files saved in meta/decisions/. Review at your convenience."
 
 ## Phase 5: Cleanup
 
@@ -208,6 +208,6 @@ rm meta/drafts/archaeology-*.md
 
 Keep meta/drafts/archaeology-consolidated.md as reference (or delete if user prefers).
 
-Report final: "Археология завершена. N решений задокументировано. Система управления знаниями готова к работе."
+Report final: "Archaeology complete. N decisions documented. Knowledge management system is ready."
 
-If GraphRAG configured: "Запусти `/graphrag extract --changed` чтобы проиндексировать новые ADR в граф знаний."
+If GraphRAG configured: "Run `/graphrag extract --changed` to index the new ADRs into the knowledge graph."

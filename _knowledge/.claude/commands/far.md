@@ -1,29 +1,29 @@
-Проведи FAR-аудит текущего контекста.
+Perform FAR audit of current context.
 
-Оцени весь накопленный контекст диалога и выдай структурированный блок:
+Evaluate all accumulated context in the conversation and produce a structured block:
 
-## FAR-аудит
+## FAR Audit
 
-### [HOT] Активное (max 3-5)
-- Что сейчас в фокусе: текущая задача, открытые вопросы, ближайшие шаги
-- Только то, что нужно прямо сейчас и дальше
+### [HOT] Active (max 3-5)
+- What is currently in focus: current task, open questions, next steps
+- Only what is needed right now and going forward
 
-### [WARM] Архив
-- Принятые решения и их обоснования — тезисно
-- Результаты завершённых этапов — факты, не процесс
-- Инсайты и ошибки, которые стоит помнить
+### [WARM] Archive
+- Accepted decisions and their rationale -- briefly
+- Results of completed stages -- facts, not process
+- Insights and mistakes worth remembering
 
-### [COLD] Сброс
-- Что можно безопасно забыть: промежуточные шаги, тупиковые ветки, обработанные логи
+### [COLD] Discard
+- What can be safely forgotten: intermediate steps, dead-end branches, processed logs
 
-### Горизонт
-- Что вероятно понадобится на следующем шаге — предвосхищение, а не резюме
+### Horizon
+- What will likely be needed at the next step -- anticipation, not summary
 
-Принципы оценки:
-1. Значимость контекстуальна — текущая задача определяет веса
-2. Объём ≠ значимость — 10 реплик на тупик не делают его важным
-3. HOT компактен — если слишком много, внимание размывается
+Evaluation principles:
+1. Significance is contextual -- the current task determines weights
+2. Volume != significance -- 10 exchanges on a dead end do not make it important
+3. HOT is compact -- if too much, attention gets diluted
 
-Оценивай семантическими блоками (ориентация → исследование → решение → реализация → рефлексия), а не отдельными репликами.
+Evaluate in semantic blocks (orientation -> exploration -> decision -> implementation -> reflection), not individual exchanges.
 
-После аудита: если WARM содержит материал для sessions.md — запомни для секретарского протокола при коммите.
+After the audit: if WARM contains material for sessions.md -- remember it for the secretary protocol at commit time.

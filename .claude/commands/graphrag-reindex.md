@@ -10,15 +10,15 @@ Check that `.graphrag/config.yaml` exists:
 ls .graphrag/config.yaml 2>/dev/null
 ```
 
-If it does not exist -- tell the user: "GraphRAG не настроен. Запусти /graphrag init." Stop.
+If it does not exist -- tell the user: "GraphRAG is not configured. Run /graphrag init." Stop.
 
 Call the `graph_stats` MCP tool to verify the server is responding.
 
-If it fails -- tell the user: "MCP-сервер не отвечает. Проверь, что graphrag_mcp установлен и настроен (/graphrag init)." Stop.
+If it fails -- tell the user: "MCP server is not responding. Verify that graphrag_mcp is installed and configured (/graphrag init)." Stop.
 
 ### Step 2: Confirm with user
 
-Ask: "Это пересоздаст весь граф знаний с нуля. Текущие данные будут удалены. Продолжить? (yes/no)"
+Ask: "This will recreate the entire knowledge graph from scratch. Current data will be deleted. Continue? (yes/no)"
 
 If the user says no -- stop.
 
@@ -28,7 +28,7 @@ If the user says no -- stop.
 rm -rf .graphrag/data/*
 ```
 
-Tell the user: "Данные графа очищены. Начинаю индексацию..."
+Tell the user: "Graph data cleared. Starting indexing..."
 
 ### Step 4: Find all knowledge files
 

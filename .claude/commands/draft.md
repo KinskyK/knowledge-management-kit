@@ -20,22 +20,22 @@ Create file: `meta/drafts/YYYY-MM-DD-HHMMSS-topic.md`
 Format:
 
 ```
-### Черновик: [тема]
-Дата: YYYY-MM-DD HH:MM
+### Draft: [topic]
+Date: YYYY-MM-DD HH:MM
 
-#### Решения
-- **[Что решили]**: [почему]. Отвергнуто: [что и почему].
+#### Decisions
+- **[What was decided]**: [why]. Rejected: [what and why].
 
-#### Проблемы
-- **[Проблема]**: [причина] → [решение]
+#### Problems
+- **[Problem]**: [cause] -> [resolution]
 
-#### Изменения подхода
-- **Было:** [старый подход]. **Стало:** [новый]. **Почему:** [причина]
+#### Approach changes
+- **Before:** [old approach]. **After:** [new]. **Why:** [reason]
 
-#### Открытые вопросы
-- [вопрос]
+#### Open questions
+- [question]
 ```
 
 ### Step 3: Confirm
 
-Report: "Черновик записан: meta/drafts/[filename]. N решений, M проблем, K вопросов."
+Report: "Draft saved: meta/drafts/[filename]. N decisions, M problems, K questions."

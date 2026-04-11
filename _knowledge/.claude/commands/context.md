@@ -1,15 +1,15 @@
-Построй карту контекста для работы с решением или тегом.
+Build context map for working with a decision or tag.
 
-Аргумент: код решения (например `FEAT-01`), обратный граф (`FEAT-01!`), или тег (`#performance`).
+Argument: decision code (e.g. `FEAT-01`), reverse graph (`FEAT-01!`), or tag (`#performance`).
 
-## Инструкция
+## Instructions
 
-Запусти скрипт:
+Run the script:
 
 ```bash
 python3 .claude/scripts/context.py $ARGUMENTS
 ```
 
-Выведи результат пользователю.
+Show the result to the user.
 
-Если пользователь попросит подгрузить — прочитай рекомендованные файлы.
+If the user asks to load context -- read the recommended files.
