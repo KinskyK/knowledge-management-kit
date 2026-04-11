@@ -44,14 +44,14 @@ if [ "$HAS_DIFF" = true ] || [ "$RECENT_MODIFY" = true ] || [ "$SESSIONS_DIFF" =
   # WARM was likely saved — soft reminder
   cat <<'JSON'
 {
-  "systemMessage": "⚠️ КОМПРЕССИЯ КОНТЕКСТА. sessions.md / roadmap.md обновлялись недавно — проверь:\n1. Все ли решения записаны в decisions/?\n2. Все ли исследования сохранены в docs/?\n3. HOT-задачи актуальны в roadmap?\n4. WARM записан в sessions.md?\n5. Есть ли незаписанные решения? → /draft\nПосле проверки — компрессия безопасна."
+  "systemMessage": "⚠️ CONTEXT COMPRESSION. sessions.md / roadmap.md were updated recently — verify:\n1. Are all decisions recorded in decisions/?\n2. Is all research saved in docs/?\n3. Are HOT tasks current in roadmap?\n4. Is WARM recorded in sessions.md?\n5. Any unrecorded decisions? → /draft\nAfter verification — compression is safe."
 }
 JSON
 else
   # WARM NOT saved — CRITICAL
   cat <<'JSON'
 {
-  "systemMessage": "🚨 CRITICAL: КОМПРЕССИЯ КОНТЕКСТА, но sessions.md / roadmap.md НЕ обновлялись!\nНЕМЕДЛЕННО:\n1. Запиши черновик решений → /draft\n2. Запиши что сейчас в HOT (задача, вопросы) в sessions.md\n3. Запиши WARM-резидуал в meta/sessions.md\n4. Есть ли незаписанные решения → decisions/?\n5. Есть ли несохранённое исследование → docs/?\nТолько после записи компрессия безопасна."
+  "systemMessage": "🚨 CRITICAL: CONTEXT COMPRESSION, but sessions.md / roadmap.md were NOT updated!\nIMMEDIATELY:\n1. Write a decision draft → /draft\n2. Write current HOT (task, questions) to sessions.md\n3. Write WARM residual to meta/sessions.md\n4. Any unrecorded decisions → decisions/?\n5. Any unsaved research → docs/?\nOnly after recording is compression safe."
 }
 JSON
 fi

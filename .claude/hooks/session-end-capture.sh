@@ -17,13 +17,13 @@ CHANGED=$(git status --porcelain --no-renames 2>/dev/null | grep -v '\.claude/' 
 if [ "$DRAFT_COUNT" -eq 0 ] && [ "$CHANGED" -gt 0 ]; then
   cat <<'JSON'
 {
-  "systemMessage": "📝 СЕССИЯ ЗАВЕРШАЕТСЯ. Есть незакоммиченные изменения, но нет черновиков.\n\nЗапиши черновик в meta/drafts/ прежде чем контекст потеряется:\n- Какие решения приняты и ПОЧЕМУ?\n- Что рассматривалось и было ОТВЕРГНУТО?\n- Какие проблемы обнаружены?\n- Какие вопросы остались открытыми?\n\nКоманда: /draft"
+  "systemMessage": "📝 SESSION ENDING. There are uncommitted changes but no drafts.\n\nWrite a draft to meta/drafts/ before context is lost:\n- What decisions were made and WHY?\n- What was considered and REJECTED?\n- What problems were discovered?\n- What questions remain open?\n\nCommand: /draft"
 }
 JSON
 elif [ "$DRAFT_COUNT" -gt 0 ]; then
   cat <<'JSON'
 {
-  "systemMessage": "📝 Сессия завершается. Черновики есть (meta/drafts/). Проверь: все ли решения из этой сессии зафиксированы?"
+  "systemMessage": "📝 Session ending. Drafts exist (meta/drafts/). Check: are all decisions from this session recorded?"
 }
 JSON
 fi

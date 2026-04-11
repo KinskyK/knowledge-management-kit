@@ -43,24 +43,24 @@ WARNINGS=""
 
 if [ "$HAS_DECISIONS" = true ]; then
   if [ "$HAS_DOMAIN_INDEX" = false ]; then
-    WARNINGS="${WARNINGS}\n⚠ Decisions изменены, но доменный _index.md не обновлён!"
+    WARNINGS="${WARNINGS}\n⚠ Decisions changed, but domain _index.md not updated!"
   fi
   if [ "$HAS_INDEX" = false ]; then
-    WARNINGS="${WARNINGS}\n⚠ Decisions изменены, но hub _index.md не обновлён!"
+    WARNINGS="${WARNINGS}\n⚠ Decisions changed, but hub _index.md not updated!"
   fi
 fi
 
 if [ "$HAS_DOCS" = true ]; then
   if [ "$HAS_DOCS_DOMAIN_INDEX" = false ]; then
-    WARNINGS="${WARNINGS}\n⚠ Docs изменены, но доменный docs/_index.md не обновлён!"
+    WARNINGS="${WARNINGS}\n⚠ Docs changed, but domain docs/_index.md not updated!"
   fi
   if [ "$HAS_DOCS_INDEX" = false ]; then
-    WARNINGS="${WARNINGS}\n⚠ Docs изменены, но hub docs/_index.md не обновлён!"
+    WARNINGS="${WARNINGS}\n⚠ Docs changed, but hub docs/_index.md not updated!"
   fi
 fi
 
 if [ "$HAS_SESSIONS" = false ] && [ "$HAS_ROADMAP" = false ]; then
-  WARNINGS="${WARNINGS}\n⚠ Ни roadmap.md, ни sessions.md не обновлены!"
+  WARNINGS="${WARNINGS}\n⚠ Neither roadmap.md nor sessions.md updated!"
 fi
 
 # Always show secretary checklist
@@ -73,25 +73,25 @@ if [ -d "$DRAFTS_DIR" ]; then
 fi
 
 if [ "$DRAFT_COUNT" -gt 0 ]; then
-  echo "📝 ЧЕРНОВИКИ: $DRAFT_COUNT файлов в meta/drafts/"
-  echo "  Прочитай и используй как основу для пунктов ниже."
-  echo "  После оформления в ADR/sessions — удали обработанные."
+  echo "📝 DRAFTS: $DRAFT_COUNT files in meta/drafts/"
+  echo "  Read and use as basis for the items below."
+  echo "  After formalizing into ADR/sessions — delete processed ones."
   echo ""
 fi
 
-echo "📋 СЕКРЕТАРСКИЙ ПРОТОКОЛ:"
-echo "  0. Черновики в meta/drafts/ → прочитай, оформи, удали обработанные"
-echo "  1. Провёл ли FAR-аудит? (WARM → sessions.md)"
-echo "  2. Есть ли незаписанные решения? → decisions/ (не забудь секцию Отвергнуто)"
-echo "  3. Есть ли несохранённое исследование? → docs/"
-echo "  4. Обновлён ли roadmap.md?"
-echo "  5. Старые сессионные блоки — что поглощено?"
-echo "  6. Решение с ⚠ → в _index.md?"
-echo "  7. Новый файл → обновлён _index.md (доменный + hub)?"
+echo "📋 SECRETARY PROTOCOL:"
+echo "  0. Drafts in meta/drafts/ → read, formalize, delete processed"
+echo "  1. Did you run FAR audit? (WARM → sessions.md)"
+echo "  2. Any unrecorded decisions? → decisions/ (don't forget the Rejected section)"
+echo "  3. Any unsaved research? → docs/"
+echo "  4. Is roadmap.md updated?"
+echo "  5. Old session blocks — what's been absorbed?"
+echo "  6. Decision with ⚠ → added to _index.md?"
+echo "  7. New file → _index.md updated (domain + hub)?"
 
 # GraphRAG extraction reminder (only if configured)
 if [ -f ".graphrag/config.yaml" ]; then
-  echo "  8. GraphRAG: извлечь тройки из изменённых файлов → /graphrag extract --changed"
+  echo "  8. GraphRAG: extract triples from changed files → /graphrag extract --changed"
 
   # Check if any ADR/docs/sessions changed but GraphRAG might not be updated
   HAS_GRAPHRAG_CANDIDATES=false
@@ -107,7 +107,7 @@ if [ -f ".graphrag/config.yaml" ]; then
   done
 
   if [ "$HAS_GRAPHRAG_CANDIDATES" = true ]; then
-    WARNINGS="${WARNINGS}\n⚠ Файлы для GraphRAG изменены. Запусти /graphrag extract --changed перед коммитом."
+    WARNINGS="${WARNINGS}\n⚠ Files for GraphRAG changed. Run /graphrag extract --changed before committing."
   fi
 fi
 
@@ -128,10 +128,10 @@ if [ "$HAS_DECISIONS" = true ]; then
       DOMAIN_INDEX="$DOMAIN_DIR/_index.md"
       if [ -f "$DOMAIN_INDEX" ]; then
         if ! grep -q "$CODE" "$DOMAIN_INDEX" 2>/dev/null; then
-          ORPHANS="${ORPHANS}\n  - $f ($CODE) — нет в $DOMAIN_INDEX"
+          ORPHANS="${ORPHANS}\n  - $f ($CODE) — not in $DOMAIN_INDEX"
         fi
       else
-        ORPHANS="${ORPHANS}\n  - $f ($CODE) — доменный _index.md отсутствует!"
+        ORPHANS="${ORPHANS}\n  - $f ($CODE) — domain _index.md missing!"
       fi
     fi
   done
@@ -145,7 +145,7 @@ if [ "$HAS_DECISIONS" = true ]; then
       adr_count=$(ls "$domain_dir"/*.md 2>/dev/null | grep -cv '_index.md\|_tags.md' 2>/dev/null)
       if [ "$adr_count" -gt 0 ]; then
         if ! grep -qi "$domain" "$HUB" 2>/dev/null; then
-          WARNINGS="${WARNINGS}\n⚠ Домен '$domain' не найден в hub _index.md!"
+          WARNINGS="${WARNINGS}\n⚠ Domain '$domain' not found in hub _index.md!"
         fi
       fi
     done
@@ -153,23 +153,23 @@ if [ "$HAS_DECISIONS" = true ]; then
 
   if [ -n "$ORPHANS" ]; then
     echo ""
-    echo "🔍 Orphan файлы (accepted без записи в _index.md):"
+    echo "🔍 Orphan files (accepted without entry in _index.md):"
     echo -e "$ORPHANS"
   fi
 fi
 
-# Validate sessions.md block format (Темы: line)
+# Validate sessions.md block format (Topics: line)
 if [ "$HAS_SESSIONS" = true ] && [ -f "meta/sessions.md" ]; then
   MISSING_TOPICS=""
   while IFS= read -r line_num; do
     LINE1=$(sed -n "$((line_num + 1))p" "meta/sessions.md")
     LINE2=$(sed -n "$((line_num + 2))p" "meta/sessions.md")
     if ! echo "$LINE1" | grep -q "^Темы:" && ! echo "$LINE2" | grep -q "^Темы:"; then
-      MISSING_TOPICS="${MISSING_TOPICS}\n  - строка ${line_num}: блок без строки 'Темы:'"
+      MISSING_TOPICS="${MISSING_TOPICS}\n  - line ${line_num}: block without 'Темы:' line"
     fi
   done < <(grep -n "^### Сессия" "meta/sessions.md" | cut -d: -f1)
   if [ -n "$MISSING_TOPICS" ]; then
-    WARNINGS="${WARNINGS}\n⚠ sessions.md: блоки без ключевых слов (строка 'Темы:' после заголовка):${MISSING_TOPICS}"
+    WARNINGS="${WARNINGS}\n⚠ sessions.md: blocks without keywords ('Темы:' line after heading):${MISSING_TOPICS}"
   fi
 fi
 
@@ -188,13 +188,13 @@ if [ "$HAS_DECISIONS" = true ]; then
     esac
   done
   if [ -n "$MISSING_REJECTED" ]; then
-    WARNINGS="${WARNINGS}\n⚠ ADR без секции Отвергнуто (рекомендуется при редактировании):${MISSING_REJECTED}"
+    WARNINGS="${WARNINGS}\n⚠ ADR without Rejected section (recommended when editing):${MISSING_REJECTED}"
   fi
 fi
 
 # Warn if committing decisions but no drafts exist
 if [ "$DRAFT_COUNT" -eq 0 ] && [ "$HAS_DECISIONS" = true ]; then
-  WARNINGS="${WARNINGS}\n⚠ Коммитишь решения без черновиков обсуждений. Запиши: /draft"
+  WARNINGS="${WARNINGS}\n⚠ Committing decisions without discussion drafts. Record one: /draft"
 fi
 
 if [ -n "$WARNINGS" ]; then

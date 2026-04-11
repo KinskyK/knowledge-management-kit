@@ -1,14 +1,14 @@
 #!/bin/bash
-# Hook: rebuild-index (АВАРИЙНЫЙ)
-# Ручной запуск: bash .claude/hooks/rebuild-index.sh
-# Генерирует двухуровневую структуру:
-#   1. Доменные _index.md из ADR-файлов (decisions) / doc-файлов (docs)
-#   2. Hub _index.md из доменных индексов
+# Hook: rebuild-index (EMERGENCY)
+# Manual run: bash .claude/hooks/rebuild-index.sh
+# Generates two-level structure:
+#   1. Domain _index.md from ADR files (decisions) / doc files (docs)
+#   2. Hub _index.md from domain indexes
 #
-# Контракт ADR: строка 1 = "# CODE — название", строка 3 = "#теги", последний ^- **Статус**:^ = статус
-# Контракт docs: строка 1 = "# название", теги = первая строка начинающаяся с #tag
+# ADR contract: line 1 = "# CODE — title", line 3 = "#tags", last ^- **Статус**:^ = status
+# Docs contract: line 1 = "# title", tags = first line starting with #tag
 #
-# Суть записей НЕ восстанавливается — ставится заглушка.
+# Entry summaries are NOT restored — a placeholder is used.
 
 set -euo pipefail
 
@@ -93,7 +93,7 @@ for domain_dir in "$DECISIONS_DIR"/*/; do
     LINKS=$(grep "^→ " "$f" 2>/dev/null | head -1 || true)
     FILE_TRIGGERS=$(grep "^⚠ " "$f" 2>/dev/null || true)
 
-    ENTRIES="${ENTRIES}### ${TITLE} ${SYMBOL}\n${TAGS}\n[СУТЬ НЕ ВОССТАНОВЛЕНА]\n"
+    ENTRIES="${ENTRIES}### ${TITLE} ${SYMBOL}\n${TAGS}\n[SUMMARY NOT RESTORED]\n"
     if [ -n "$LINKS" ]; then
       ENTRIES="${ENTRIES}${LINKS}\n"
     fi
@@ -114,19 +114,19 @@ for domain_dir in "$DECISIONS_DIR"/*/; do
 
   {
     echo "# ${DOMAIN_DISPLAY}"
-    echo "Решений: ${COUNT} | ■ ${AXIOM} | ◆ ${RULE} | ● ${HYPOTHESIS}"
+    echo "Decisions: ${COUNT} | ■ ${AXIOM} | ◆ ${RULE} | ● ${HYPOTHESIS}"
     echo ""
     echo -e "$ENTRIES"
     if [ -n "$TRIGGERS" ]; then
-      echo "## ⚠ Триггеры пересмотра"
+      echo "## ⚠ Review triggers"
       echo -e "$TRIGGERS"
     fi
     echo "---"
-    echo "Восстановлено: $(date '+%Y-%m-%d %H:%M')"
-    echo "ВНИМАНИЕ: все строки [СУТЬ НЕ ВОССТАНОВЛЕНА] требуют ручного заполнения."
+    echo "Restored: $(date '+%Y-%m-%d %H:%M')"
+    echo "WARNING: all [SUMMARY NOT RESTORED] lines require manual filling."
   } > "$DOMAIN_INDEX"
 
-  echo "  ✓ $DOMAIN_INDEX ($COUNT записей)"
+  echo "  ✓ $DOMAIN_INDEX ($COUNT entries)"
 
   # Collect for hub
   HUB_DOMAINS+=("$domain")
@@ -151,14 +151,14 @@ done
 
 {
   echo "# Decisions Hub"
-  echo "Решений: ${TOTAL} | ■ ${TOTAL_A} | ◆ ${TOTAL_R} | ● ${TOTAL_H}"
-  echo "Доменные индексы: ${DECISIONS_DIR}/{domain}/_index.md"
+  echo "Decisions: ${TOTAL} | ■ ${TOTAL_A} | ◆ ${TOTAL_R} | ● ${TOTAL_H}"
+  echo "Domain indexes: ${DECISIONS_DIR}/{domain}/_index.md"
   echo ""
-  echo "Легенда: ■ АКСИОМА | ◆ ПРАВИЛО | ● ГИПОТЕЗА"
+  echo "Legend: ■ AXIOM | ◆ RULE | ● HYPOTHESIS"
   echo ""
-  echo "## Домены"
-  echo "| Домен | Решений | Статистика | Описание |"
-  echo "|-------|---------|------------|----------|"
+  echo "## Domains"
+  echo "| Domain | Decisions | Stats | Description |"
+  echo "|--------|-----------|-------|-------------|"
 
   for i in "${!HUB_DOMAINS[@]}"; do
     d="${HUB_DOMAINS[i]}"
@@ -178,15 +178,15 @@ done
   done
 
   if [ -n "$ALL_TRIGGERS" ]; then
-    echo "## ⚠ Триггеры пересмотра"
+    echo "## ⚠ Review triggers"
     echo -e "$ALL_TRIGGERS"
   fi
 
   echo "---"
-  echo "Восстановлено: $(date '+%Y-%m-%d %H:%M')"
+  echo "Restored: $(date '+%Y-%m-%d %H:%M')"
 } > "$DECISIONS_DIR/_index.md"
 
-echo "  ✓ $DECISIONS_DIR/_index.md (hub, $TOTAL записей)"
+echo "  ✓ $DECISIONS_DIR/_index.md (hub, $TOTAL entries)"
 
 # ═══════════════════════════════════════════════
 # DOCS
@@ -227,12 +227,12 @@ for topic_dir in "$DOCS_DIR"/*/; do
     if [ -n "$DOC_TAGS" ]; then
       DOC_ENTRIES="${DOC_ENTRIES}${DOC_TAGS}\n"
     fi
-    DOC_ENTRIES="${DOC_ENTRIES}[СУТЬ НЕ ВОССТАНОВЛЕНА]\n"
+    DOC_ENTRIES="${DOC_ENTRIES}[SUMMARY NOT RESTORED]\n"
     if [ -n "$DOC_LINKS" ]; then
       DOC_ENTRIES="${DOC_ENTRIES}${DOC_LINKS}\n"
     fi
     if [ -n "$DOC_DATE" ]; then
-      DOC_ENTRIES="${DOC_ENTRIES}Создано: ${DOC_DATE}\n"
+      DOC_ENTRIES="${DOC_ENTRIES}Created: ${DOC_DATE}\n"
     fi
     DOC_ENTRIES="${DOC_ENTRIES}\n"
   done
@@ -244,16 +244,16 @@ for topic_dir in "$DOCS_DIR"/*/; do
   # Write topic _index.md
   TOPIC_INDEX="$topic_dir/_index.md"
   {
-    echo "# Документация: ${topic}"
-    echo "Документов: ${DOC_COUNT}"
+    echo "# Documentation: ${topic}"
+    echo "Documents: ${DOC_COUNT}"
     echo ""
     echo -e "$DOC_ENTRIES"
     echo "---"
-    echo "Восстановлено: $(date '+%Y-%m-%d %H:%M')"
-    echo "ВНИМАНИЕ: все строки [СУТЬ НЕ ВОССТАНОВЛЕНА] требуют ручного заполнения."
+    echo "Restored: $(date '+%Y-%m-%d %H:%M')"
+    echo "WARNING: all [SUMMARY NOT RESTORED] lines require manual filling."
   } > "$TOPIC_INDEX"
 
-  echo "  ✓ $TOPIC_INDEX ($DOC_COUNT документов)"
+  echo "  ✓ $TOPIC_INDEX ($DOC_COUNT documents)"
 
   DOCS_HUB_TOPICS+=("$topic")
   DOCS_HUB_COUNTS+=("$DOC_COUNT")
@@ -275,30 +275,30 @@ done
 DOC_TOTAL=$((DOC_TOTAL + TOP_LEVEL_DOCS))
 
 {
-  echo "# Карта исследований"
-  echo "Документов: ${DOC_TOTAL}"
+  echo "# Research Map"
+  echo "Documents: ${DOC_TOTAL}"
   echo ""
-  echo "Правило: перед ответом на вопрос по теме — прочитай файл. Не отвечай по памяти."
-  echo "Тема не покрыта файлом → проведи исследование, создай файл, добавь сюда."
+  echo "Rule: before answering a question on a topic — read the file. Do not answer from memory."
+  echo "Topic not covered by a file → conduct research, create file, add here."
   echo ""
-  echo "## Темы"
-  echo "| Тема | Документов |"
-  echo "|------|------------|"
+  echo "## Topics"
+  echo "| Topic | Documents |"
+  echo "|-------|-----------|"
 
   for i in "${!DOCS_HUB_TOPICS[@]}"; do
     echo "| ${DOCS_HUB_TOPICS[i]} | ${DOCS_HUB_COUNTS[i]} |"
   done
 
   if [ "$TOP_LEVEL_DOCS" -gt 0 ]; then
-    echo "| (корневые) | ${TOP_LEVEL_DOCS} |"
+    echo "| (root) | ${TOP_LEVEL_DOCS} |"
   fi
 
   echo ""
   echo "---"
-  echo "Восстановлено: $(date '+%Y-%m-%d %H:%M')"
+  echo "Restored: $(date '+%Y-%m-%d %H:%M')"
 } > "$DOCS_DIR/_index.md"
 
-echo "  ✓ $DOCS_DIR/_index.md (hub, $DOC_TOTAL документов)"
+echo "  ✓ $DOCS_DIR/_index.md (hub, $DOC_TOTAL documents)"
 
 echo ""
-echo "Готово. Все строки [СУТЬ НЕ ВОССТАНОВЛЕНА] требуют ручного заполнения."
+echo "Done. All [SUMMARY NOT RESTORED] lines require manual filling."

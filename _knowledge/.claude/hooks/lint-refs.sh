@@ -28,9 +28,9 @@ code_exists() {
 }
 
 # ═══════════════════════════════════════════
-# A. Ссылочная целостность [[CODE]]
+# A. Referential integrity [[CODE]]
 # ═══════════════════════════════════════════
-echo "A. Ссылочная целостность [[CODE]]"
+echo "A. Referential integrity [[CODE]]"
 
 for f in meta/decisions/*/*.md meta/docs/*/*.md; do
   [ -f "$f" ] || continue
@@ -39,7 +39,7 @@ for f in meta/decisions/*/*.md meta/docs/*/*.md; do
   refs=$(grep -o '\[\[[A-Z][A-Z_-]*-[0-9]*\]\]' "$f" 2>/dev/null | sed 's/\[\[//;s/\]\]//' | sort -u)
   for ref in $refs; do
     if ! code_exists "$ref"; then
-      error "$bn: [[${ref}]] → файл не найден"
+      error "$bn: [[${ref}]] → file not found"
     fi
   done
 done
@@ -47,16 +47,16 @@ done
 echo ""
 
 # ═══════════════════════════════════════════
-# B. Пути в SKILL.md
+# B. Paths in SKILL.md
 # ═══════════════════════════════════════════
-echo "B. Пути в SKILL.md"
+echo "B. Paths in SKILL.md"
 
 for skill in .claude/skills/*/SKILL.md; do
   [ -f "$skill" ] || continue
   skill_name=$(basename "$(dirname "$skill")")
   grep -o 'meta/[^ ,;)]*\.md\|agents/[^ ,;)]*\.md' "$skill" 2>/dev/null | sort -u | while read -r p; do
     if [ ! -f "$p" ]; then
-      error "$skill_name/SKILL.md: путь '$p' → файл не найден"
+      error "$skill_name/SKILL.md: path '$p' → file not found"
     fi
   done
 done
@@ -64,39 +64,39 @@ done
 echo ""
 
 # ═══════════════════════════════════════════
-# C. Контракт ADR-формата
+# C. ADR format contract
 # ═══════════════════════════════════════════
-echo "C. Контракт ADR-формата"
+echo "C. ADR format contract"
 
 for f in meta/decisions/*/*.md; do
   [ -f "$f" ] || continue
   bn=$(basename "$f")
   case "$bn" in _index.md|_tags.md) continue ;; esac
 
-  # Line 1: # CODE — название (using em dash —)
+  # Line 1: # CODE — title (using em dash —)
   line1=$(head -1 "$f")
   if ! echo "$line1" | grep -qE '^# [A-Z][A-Za-z0-9_-]*-[0-9]+ — .+'; then
-    error "$bn: строка 1 не соответствует контракту '# CODE — название'"
+    error "$bn: line 1 does not match contract '# CODE — title'"
   fi
 
   # Line 3: starts with #tag
   line3=$(sed -n '3p' "$f")
   if ! echo "$line3" | grep -qE '^#[a-z]'; then
-    error "$bn: строка 3 не содержит тегов"
+    error "$bn: line 3 does not contain tags"
   fi
 
   # Has Статус field
   if ! grep -q 'Статус' "$f" 2>/dev/null; then
-    warn "$bn: нет поля Статус"
+    warn "$bn: missing Status field"
   fi
 done
 
 echo ""
 
 # ═══════════════════════════════════════════
-# D. Рассинхрон ADR ↔ доменный _index
+# D. Out of sync ADR ↔ domain _index
 # ═══════════════════════════════════════════
-echo "D. Рассинхрон ADR ↔ доменный _index"
+echo "D. Out of sync ADR ↔ domain _index"
 
 for f in meta/decisions/*/*.md; do
   [ -f "$f" ] || continue
@@ -113,13 +113,13 @@ for f in meta/decisions/*/*.md; do
 
   # Check entry exists
   if ! grep -q "^### $code " "$domain_index" 2>/dev/null; then
-    error "$code: нет записи в $(basename "$domain_dir")/_index.md"
+    error "$code: no entry in $(basename "$domain_dir")/_index.md"
   else
     # Check tags match
     file_tags=$(sed -n '3p' "$f")
     index_tags=$(grep -A1 "^### $code " "$domain_index" 2>/dev/null | tail -1)
     if [ "$file_tags" != "$index_tags" ]; then
-      warn "$code: теги расходятся — файл vs _index"
+      warn "$code: tags diverge — file vs _index"
     fi
   fi
 done
@@ -127,9 +127,9 @@ done
 echo ""
 
 # ═══════════════════════════════════════════
-# E. Orphan-теги
+# E. Orphan tags
 # ═══════════════════════════════════════════
-echo "E. Orphan-теги"
+echo "E. Orphan tags"
 
 if [ -f "meta/_tags.md" ]; then
   # Tags defined in _tags.md
@@ -148,14 +148,14 @@ if [ -f "meta/_tags.md" ]; then
   # Defined but unused
   for tag in $defined_tags; do
     if ! echo "$used_tags" | grep -qx "$tag"; then
-      warn "Тег $tag определён в _tags.md, но не используется ни в одном ADR"
+      warn "Tag $tag defined in _tags.md but not used in any ADR"
     fi
   done
 
   # Used but undefined
   for tag in $used_tags; do
     if ! echo "$defined_tags" | grep -qx "$tag"; then
-      error "Тег $tag используется в ADR, но не определён в _tags.md"
+      error "Tag $tag used in ADR but not defined in _tags.md"
     fi
   done
 fi
@@ -163,9 +163,9 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════
-# F. Устаревшие триггеры пересмотра
+# F. Stale review triggers
 # ═══════════════════════════════════════════
-echo "F. Устаревшие триггеры пересмотра"
+echo "F. Stale review triggers"
 
 HUB="meta/decisions/_index.md"
 if [ -f "$HUB" ]; then
@@ -181,7 +181,7 @@ if [ -f "$HUB" ]; then
         if [ -n "$LAST_MOD" ]; then
           DAYS_AGO=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$LAST_MOD" +%s 2>/dev/null || date -d "$LAST_MOD" +%s 2>/dev/null || echo 0)) / 86400 ))
           if [ "$DAYS_AGO" -gt 30 ]; then
-            warn "$CODE: триггер ⚠ в hub, но файл не обновлялся ${DAYS_AGO} дней"
+            warn "$CODE: trigger ⚠ in hub, but file not updated for ${DAYS_AGO} days"
           fi
         fi
       fi
@@ -192,10 +192,10 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════
-# G. Сиротские ADR (нет входящих/исходящих ссылок)
+# G. Orphan ADR (no incoming/outgoing links)
 # ═══════════════════════════════════════════
 # NOTE: O(n^2) — acceptable for <100 ADR files. For larger projects, consider caching refs.
-echo "G. Сиротские ADR (нет ссылок)"
+echo "G. Orphan ADR (no links)"
 
 for f in meta/decisions/*/*.md; do
   [ -f "$f" ] || continue
@@ -227,19 +227,19 @@ for f in meta/decisions/*/*.md; do
   fi
 
   if [ "$HAS_INCOMING" = false ] && [ "$HAS_OUTGOING" = false ]; then
-    warn "$CODE ($f): нет ни входящих, ни исходящих ссылок [[CODE]]"
+    warn "$CODE ($f): no incoming or outgoing [[CODE]] links"
   fi
 done
 
 echo ""
 
 # ═══════════════════════════════════════════
-# Итог
+# Summary
 # ═══════════════════════════════════════════
 echo "═══════════════════════════════"
-echo "Ошибок: $ERRORS | Предупреждений: $WARNINGS"
+echo "Errors: $ERRORS | Warnings: $WARNINGS"
 if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
-  echo "✓ Всё чисто"
+  echo "✓ All clean"
 fi
 
 exit 0

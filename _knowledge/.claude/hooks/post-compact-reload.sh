@@ -30,7 +30,7 @@ try:
 except Exception:
     # Fallback: can't read roadmap
     print(json.dumps({
-        "systemMessage": "⚠️ Контекст НЕ восстановлен после компрессии: не удалось прочитать meta/roadmap.md. Прочитай его вручную."
+        "systemMessage": "⚠️ Context NOT restored after compression: failed to read meta/roadmap.md. Read it manually."
     }))
     sys.exit(0)
 
@@ -50,16 +50,16 @@ if sessions_path:
         if sessions_blocks:
             latest_session = sessions_blocks[-1].strip()
             if len(sessions_blocks) > 1:
-                latest_session += f"\n\n📂 В sessions.md ещё {len(sessions_blocks) - 1} блоков. При недопонимании или споре о контексте решения — читай ранние блоки (deep dive)."
+                latest_session += f"\n\n📂 sessions.md has {len(sessions_blocks) - 1} more blocks. If unclear or debating decision context — read earlier blocks (deep dive)."
     except Exception:
         pass
 
 # Build context
 parts = []
 if task_stack:
-    parts.append("## Текущий стек задач (из roadmap.md)\n" + task_stack)
+    parts.append("## Current task stack (from roadmap.md)\n" + task_stack)
 if latest_session:
-    parts.append("## Последний сессионный контекст (из sessions.md)\n" + latest_session)
+    parts.append("## Latest session context (from sessions.md)\n" + latest_session)
 
 if not parts:
     sys.exit(0)
@@ -67,7 +67,7 @@ if not parts:
 context = "\n\n".join(parts)
 
 print(json.dumps({
-    "systemMessage": "Контекст восстановлен после компрессии. Стек задач из roadmap.md, сессионный блок из sessions.md.",
+    "systemMessage": "Context restored after compression. Task stack from roadmap.md, session block from sessions.md.",
     "hookSpecificOutput": {
         "hookEventName": "PostCompact",
         "additionalContext": context

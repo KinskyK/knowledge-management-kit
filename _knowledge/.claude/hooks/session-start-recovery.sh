@@ -14,10 +14,10 @@ CHANGED=$(git status --porcelain --no-renames 2>/dev/null | grep -v '\.claude/' 
 
 if [ -n "$CHANGED" ]; then
   COUNT=$(echo "$CHANGED" | wc -l | tr -d ' ')
-  OUTPUT="${OUTPUT}⚠️ ПРЕДЫДУЩАЯ СЕССИЯ ЗАВЕРШИЛАСЬ БЕЗ КОММИТА.\n"
-  OUTPUT="${OUTPUT}Незакоммиченных файлов: ${COUNT}\n\n"
+  OUTPUT="${OUTPUT}⚠️ PREVIOUS SESSION ENDED WITHOUT COMMIT.\n"
+  OUTPUT="${OUTPUT}Uncommitted files: ${COUNT}\n\n"
   OUTPUT="${OUTPUT}$(echo "$CHANGED" | head -15)\n\n"
-  OUTPUT="${OUTPUT}Рекомендация: просмотри git diff, обнови roadmap.md / sessions.md, закоммить.\n"
+  OUTPUT="${OUTPUT}Recommendation: review git diff, update roadmap.md / sessions.md, commit.\n"
 fi
 
 # --- Check 2: Roadmap staleness (FAR monitoring) ---
@@ -31,8 +31,8 @@ if [ -f "$ROADMAP" ]; then
     if [ -n "$LAST_COMMIT_TS" ]; then
       HOURS_AGO=$(( (NOW_TS - LAST_COMMIT_TS) / 3600 ))
       if [ "$HOURS_AGO" -gt 48 ]; then
-        OUTPUT="${OUTPUT}\n📋 roadmap.md последний раз обновлялся ${HOURS_AGO}ч назад.\n"
-        OUTPUT="${OUTPUT}Возможно, FAR-аудит не проводился. Рекомендация: запусти /far в начале сессии.\n"
+        OUTPUT="${OUTPUT}\n📋 roadmap.md was last updated ${HOURS_AGO}h ago.\n"
+        OUTPUT="${OUTPUT}FAR audit may not have been run. Recommendation: run /far at session start.\n"
       fi
     fi
   fi
@@ -44,10 +44,10 @@ if [ -f "$SESSIONS" ]; then
   SESSION_COUNT=$(grep -c "^### Сессия" "$SESSIONS" 2>/dev/null || echo "0")
   LAST_SESSION=$(grep -n "^### Сессия" "$SESSIONS" | tail -1 | cut -d: -f1)
   if [ -n "$LAST_SESSION" ]; then
-    OUTPUT="${OUTPUT}\n📋 Последний сессионный контекст (sessions.md):\n"
+    OUTPUT="${OUTPUT}\n📋 Last session context (sessions.md):\n"
     OUTPUT="${OUTPUT}$(tail -n +$LAST_SESSION "$SESSIONS" | head -20)\n"
     if [ "$SESSION_COUNT" -gt 1 ]; then
-      OUTPUT="${OUTPUT}\n📂 В sessions.md ещё $((SESSION_COUNT - 1)) блоков. При недопонимании или споре о контексте решения — читай ранние блоки (deep dive).\n"
+      OUTPUT="${OUTPUT}\n📂 sessions.md has $((SESSION_COUNT - 1)) more blocks. If unclear or debating decision context — read earlier blocks (deep dive).\n"
     fi
   fi
 fi
@@ -57,13 +57,13 @@ DRAFTS_DIR="meta/drafts"
 if [ -d "$DRAFTS_DIR" ]; then
   DRAFT_COUNT=$(find "$DRAFTS_DIR" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
   if [ "$DRAFT_COUNT" -gt 0 ]; then
-    OUTPUT="${OUTPUT}\n📝 Необработанных черновиков: ${DRAFT_COUNT} в meta/drafts/\n"
-    OUTPUT="${OUTPUT}Оформи в ADR/sessions при следующем коммите.\n"
+    OUTPUT="${OUTPUT}\n📝 Unprocessed drafts: ${DRAFT_COUNT} in meta/drafts/\n"
+    OUTPUT="${OUTPUT}Formalize into ADR/sessions at next commit.\n"
 
     # Warn if drafts are older than 7 days
     OLD_DRAFTS=$(find "$DRAFTS_DIR" -maxdepth 1 -name "*.md" -mtime +7 2>/dev/null | wc -l | tr -d ' ')
     if [ "$OLD_DRAFTS" -gt 0 ]; then
-      OUTPUT="${OUTPUT}⚠ Из них ${OLD_DRAFTS} старше 7 дней — возможно, уже неактуальны.\n"
+      OUTPUT="${OUTPUT}⚠ ${OLD_DRAFTS} of them are older than 7 days — may be outdated.\n"
     fi
   fi
 fi
