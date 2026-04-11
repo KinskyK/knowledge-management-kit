@@ -4,11 +4,12 @@ Use this when a project has history (sessions, git commits) but no documented de
 
 ## Overview
 
-Four phases:
+Five phases:
 1. **Extract** — read history in chunks, write raw drafts
 2. **Build evolution trees** — group by topic, trace changes
 3. **Compile** — generate ADR files from current state of each decision
 4. **Review** — optional user review
+5. **Cleanup** — delete processed drafts
 
 ## Phase 1: Extract
 
