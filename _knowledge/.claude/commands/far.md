@@ -15,6 +15,7 @@ Evaluate all accumulated context in the conversation and produce a structured bl
 
 ### [COLD] Discard
 - What can be safely forgotten: intermediate steps, dead-end branches, processed logs
+- **BEFORE discarding:** check if COLD contains unrecorded knowledge (specifications, business rules, vocabulary, patterns). If yes — write a draft via /draft FIRST, then discard from attention.
 
 ### Horizon
 - What will likely be needed at the next step -- anticipation, not summary

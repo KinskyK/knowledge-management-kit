@@ -80,9 +80,10 @@ Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the d
   - User asks "why not X" / "why exactly this way" → the answer may be in a session block, not in the ADR
   - User raises a topic again that's already in sessions.md → check block headers before diving into bodies
 - **"Rejected" section in ADR**: recommended (not optional). Record rejected alternatives and reasons for rejection. This is a deep layer — when reconsidering a decision, it prevents repeating already-rejected options.
-- **Auto-capture drafts** (meta/drafts/): when a decision is made, a problem is discovered, or an approach changes — write a draft via `/draft`. Don't wait for commit. Include: what was decided, WHY, what was rejected. This is raw material for the Secretary Protocol.
+- **Auto-capture drafts** (meta/drafts/): when ANY significant knowledge appears — write a draft via `/draft`. Not just decisions: also specifications, business rules, vocabulary, patterns, research findings. Don't wait for commit. This is raw material for the Secretary Protocol.
 - **Push heuristic**: loading context for a non-active task → think about push (new Depth in roadmap)
-- **docs/**: before answering a question on a topic — read the file from docs/. Don't answer from memory. Research conducted → save to docs/.
+- **docs/**: stores ALL reference knowledge — not just research, but also specifications, business rules, vocabulary, data patterns. Before answering a question on a topic — read the file from docs/. Don't answer from memory. Knowledge discovered → save to docs/. Each file is a living document — update by rewriting (like brief), git stores history.
+- **Language rule**: system files (CLAUDE.md, hooks, commands, protocols) — English. User-facing content (ADR content, sessions, roadmap tasks, docs/ content) — user's language of communication.
 - **Tags**: when creating a decision — check against meta/_tags.md
 - **Backward compatibility**: after any architectural change — go through EVERY existing component (agent, skill, hook, protocol, file) and ask: "does it match the new reality?" Not by categories — one by one. Categories create blind spots.
 
