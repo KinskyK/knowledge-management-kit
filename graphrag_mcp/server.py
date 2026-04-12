@@ -83,6 +83,25 @@ TOOLS = [
         },
     ),
     Tool(
+        name="graph_entity",
+        description=(
+            "Show all connections of a specific entity in the knowledge graph. "
+            "Returns: the entity description, all entities it connects to, "
+            "and the nature of each connection. Use to explore dependencies "
+            "and cross-domain relationships."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "entity_name": {
+                    "type": "string",
+                    "description": "Entity name to explore (e.g. 'FAR Protocol', 'CORE-01')",
+                },
+            },
+            "required": ["entity_name"],
+        },
+    ),
+    Tool(
         name="graph_stats",
         description="Knowledge graph statistics: node count, edge count.",
         inputSchema={"type": "object", "properties": {}},
@@ -132,6 +151,10 @@ class GraphRAGServer:
         if name == "check_entity":
             result = await self._bridge.check_entity(arguments["entity_name"])
             return json.dumps(result, indent=2)
+
+        if name == "graph_entity":
+            result = await self._bridge.graph_entity(arguments["entity_name"])
+            return json.dumps(result, indent=2, ensure_ascii=False)
 
         if name == "graph_stats":
             return json.dumps(await self._bridge.stats(), indent=2)

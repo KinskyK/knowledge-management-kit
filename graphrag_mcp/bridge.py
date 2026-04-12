@@ -74,6 +74,63 @@ class GraphRAGBridge:
         except Exception as e:
             return {"error": str(e), "source_id": source_id}
 
+    async def graph_entity(self, entity_name: str) -> dict:
+        """Show all connections of a specific entity."""
+        try:
+            graph = self._rag.chunk_entity_relation_graph
+            g = graph._graph if hasattr(graph, "_graph") else graph
+
+            if entity_name not in g.nodes():
+                # Try case-insensitive search
+                matches = [n for n in g.nodes() if n.lower() == entity_name.lower()]
+                if matches:
+                    entity_name = matches[0]
+                else:
+                    # Try partial match
+                    matches = [n for n in g.nodes() if entity_name.lower() in n.lower()]
+                    if matches:
+                        return {
+                            "entity_name": entity_name,
+                            "exists": False,
+                            "similar": matches[:5],
+                            "hint": "Entity not found. Did you mean one of these?"
+                        }
+                    return {"entity_name": entity_name, "exists": False}
+
+            node_data = dict(g.nodes[entity_name])
+
+            # Get all edges (both directions)
+            connections = []
+            for u, v, data in g.edges(data=True):
+                if u == entity_name:
+                    connections.append({
+                        "target": v,
+                        "direction": "outgoing",
+                        "description": data.get("description", ""),
+                        "keywords": data.get("keywords", ""),
+                        "weight": data.get("weight", 1.0),
+                    })
+                elif v == entity_name:
+                    connections.append({
+                        "source": u,
+                        "direction": "incoming",
+                        "description": data.get("description", ""),
+                        "keywords": data.get("keywords", ""),
+                        "weight": data.get("weight", 1.0),
+                    })
+
+            return {
+                "entity_name": entity_name,
+                "exists": True,
+                "entity_type": node_data.get("entity_type", "unknown"),
+                "description": node_data.get("description", ""),
+                "source_id": node_data.get("source_id", ""),
+                "connections": connections,
+                "connection_count": len(connections),
+            }
+        except Exception as e:
+            return {"entity_name": entity_name, "error": str(e)}
+
     async def check_entity(self, entity_name: str) -> dict:
         """Check if an entity exists in the graph."""
         try:

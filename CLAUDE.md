@@ -50,6 +50,20 @@ Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the d
 - `/context CODE` — context map (direct/transitive dependencies, thematic intersections)
 - `/context CODE!` — reverse graph (what depends on CODE)
 - `/context #tag` — all decisions with this tag
+- `/search <query>` — semantic search across all knowledge (decisions + docs). Use when indexes don't find what you need.
+- `/graph <entity>` — show all connections of an entity in the knowledge graph
+
+**When to use /search** (if GraphRAG is configured):
+- Starting work on a topic and not sure if there's relevant knowledge in the base
+- Didn't find what you need through indexes — it may be recorded under different words in another domain
+- User asks something and you're not sure you know everything — check
+- Topic changed mid-session — check if there are decisions and specs for the new topic
+- Before recording a new decision — search if a similar one already exists
+
+**When to use /graph:**
+- Want to see what's connected to a specific entity (decision, concept, file)
+- Exploring dependencies before changing something — what might be affected
+- Looking for cross-domain connections that indexes don't show
 
 ## Rules
 - Every accepted decision is recorded immediately in a decisions file in ADR format
