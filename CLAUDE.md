@@ -53,6 +53,9 @@ Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the d
 - `/search <query>` — semantic search across all knowledge (decisions + docs). Use when indexes don't find what you need.
 - `/graph <entity>` — show all connections of an entity in the knowledge graph
 
+**Knowledge graph** (if GraphRAG is configured):
+You have a knowledge graph — a network of entities (decisions, concepts, specifications, files) connected by typed relationships (depends-on, influences, solves, part-of, etc.). Two ways to use it: `/search` finds entities by meaning (even if you don't know exact names or domains), `/graph` shows all connections of a specific entity (what depends on it, what it influences, what's nearby). The graph sees cross-domain connections that file-based indexes can't show. Use it as a supplement to index navigation, not a replacement.
+
 **When to use /search** (if GraphRAG is configured):
 - Starting work on a topic and not sure if there's relevant knowledge in the base
 - Didn't find what you need through indexes — it may be recorded under different words in another domain
