@@ -45,6 +45,7 @@ Read before starting work:
 Domain indexes: `meta/decisions/{domain}/_index.md` — detailed domain skeleton. Load when the task concerns a specific domain.
 manifest (meta/project_manifest.md) — on demand, when the task concerns file structure.
 Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the domain _index when the task concerns them.
+backlog (meta/backlog.md) — observations, gaps, deferred ideas. Load when reviewing system health or planning next steps.
 
 **Context commands:**
 - `/context CODE` — context map (direct/transitive dependencies, thematic intersections)
@@ -52,6 +53,15 @@ Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the d
 - `/context #tag` — all decisions with this tag
 - `/search <query>` — semantic search across all knowledge (decisions + docs). Use when indexes don't find what you need.
 - `/graph <entity>` — show all connections of an entity in the knowledge graph
+- `/draft` — write a session draft capturing all significant knowledge (decisions, specs, rules, patterns)
+- `/knowledge-archaeology` — retroactive extraction from session history + git. Use when a project has history but no documented decisions.
+- `/graphrag-init` — set up GraphRAG (semantic search + knowledge graph). Run once per project.
+- `/graphrag-extract --changed` — extract triples from changed files into the graph. Used at commit (step 8).
+- `/graphrag-reindex` — emergency full rebuild of the knowledge graph from scratch.
+
+**Maintenance commands** (run manually when needed):
+- `bash .claude/hooks/rebuild-index.sh` — emergency rebuild of decision/docs indexes from ADR files. Use when indexes are corrupted or out of sync.
+- `bash .claude/hooks/lint-refs.sh` — validate referential integrity: [[CODE]] links, ADR format contract, tag sync, orphan files, stale review triggers. Advisory — warns, doesn't block.
 
 **Knowledge graph** (if GraphRAG is configured):
 You have a knowledge graph — a network of entities (decisions, concepts, specifications, files) connected by typed relationships (depends-on, influences, solves, part-of, etc.). Two ways to use it: `/search` finds entities by meaning (even if you don't know exact names or domains), `/graph` shows all connections of a specific entity (what depends on it, what it influences, what's nearby). The graph sees cross-domain connections that file-based indexes can't show. Use it as a supplement to index navigation, not a replacement.
@@ -67,6 +77,13 @@ You have a knowledge graph — a network of entities (decisions, concepts, speci
 - Want to see what's connected to a specific entity (decision, concept, file)
 - Exploring dependencies before changing something — what might be affected
 - Looking for cross-domain connections that indexes don't show
+
+**Hooks (automatic, you don't call them — know what they do):**
+- **session-start**: loads last session block, shows pending drafts, checks uncommitted changes and roadmap staleness
+- **session-end (Stop)**: prompts you to write a draft if work was done but no drafts exist
+- **pre-commit**: shows secretary protocol checklist, validates indexes and ADR format, checks for missing drafts
+- **pre-compact**: checks if WARM was saved to sessions.md. If not — CRITICAL warning. If yes — soft reminder.
+- **post-compact**: after compression, re-injects task stack from roadmap + last session block into context
 
 ## Rules
 - Every accepted decision is recorded immediately in a decisions file in ADR format

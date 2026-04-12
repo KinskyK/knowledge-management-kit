@@ -113,7 +113,7 @@ Copy from `_knowledge/` to the project root:
 - `meta/project_manifest.md` → `meta/`
 - `meta/drafts/.gitkeep` → `meta/drafts/`
 - `.claude/hooks/*` → `.claude/hooks/` (all 7 hooks)
-- `.claude/commands/*` → `.claude/commands/` (all 8 commands)
+- `.claude/commands/*` → `.claude/commands/` (all 9 commands)
 - `.claude/scripts/context.py` → `.claude/scripts/`
 - `templates/extraction-template.json` → `templates/`
 
@@ -210,7 +210,7 @@ Output a brief summary:
 ✓ meta/sessions.md — session context
 ✓ meta/drafts/ — auto-capture buffer
 ✓ .claude/hooks/ — 7 hooks
-✓ .claude/commands/ — 8 commands
+✓ .claude/commands/ — 9 commands
 ✓ Full Attention Residuals.md — FAR specification
 ✓ agents/AGENT_PROTOCOL.md — agent protocol
 

@@ -34,11 +34,25 @@ Read before starting work:
 Domain indexes: `meta/decisions/{domain}/_index.md` — detailed domain skeleton. Load when the task concerns a specific domain.
 manifest (meta/project_manifest.md) — on demand, when the task concerns file structure.
 Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the domain _index when the task concerns them.
+backlog (meta/backlog.md) — observations, gaps, deferred ideas. Load when reviewing system health or planning next steps.
 
 **Context commands:**
 - `/context CODE` — context map (direct/transitive dependencies, thematic intersections)
 - `/context CODE!` — reverse graph (who depends on CODE)
 - `/context #tag` — all decisions with this tag
+- `/draft` — write a session draft capturing all significant knowledge
+- `/knowledge-archaeology` — retroactive extraction from session history + git. Use when a project has history but no documented decisions.
+
+**Maintenance commands** (run manually when needed):
+- `bash .claude/hooks/rebuild-index.sh` — emergency rebuild of decision/docs indexes
+- `bash .claude/hooks/lint-refs.sh` — validate referential integrity
+
+**Hooks (automatic):**
+- **session-start**: loads last session block, shows pending drafts, checks uncommitted changes
+- **session-end**: prompts draft writing if work was done but no drafts exist
+- **pre-commit**: secretary protocol checklist, validates indexes and ADR format
+- **pre-compact**: checks if WARM was saved. CRITICAL warning if not.
+- **post-compact**: re-injects task stack + last session block into context
 
 ## Rules
 - Every accepted decision is immediately recorded in a decisions file in ADR format
