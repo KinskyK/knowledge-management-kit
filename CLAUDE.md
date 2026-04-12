@@ -45,7 +45,7 @@ Read before starting work:
 Domain indexes: `meta/decisions/{domain}/_index.md` — detailed domain skeleton. Load when the task concerns a specific domain.
 manifest (meta/project_manifest.md) — on demand, when the task concerns file structure.
 Decision files (meta/decisions/{domain}/{CODE}.md) — load via links from the domain _index when the task concerns them.
-backlog (meta/backlog.md) — observations, gaps, deferred ideas. Load when reviewing system health or planning next steps.
+Backlog lives in the Backlog section of meta/roadmap.md — observations, gaps, deferred ideas. Review when planning next steps.
 
 **Context commands:**
 - `/context CODE` — context map (direct/transitive dependencies, thematic intersections)

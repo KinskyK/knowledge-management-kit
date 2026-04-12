@@ -9,3 +9,7 @@
 
 ## Session Context
 → meta/sessions.md (separate file; on start, the latest block is loaded)
+
+## Backlog
+
+Observations, gaps, deferred ideas. Periodically review — promote to Task Stack or remove if outdated.

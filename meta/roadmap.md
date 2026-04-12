@@ -7,19 +7,51 @@
 
 ### Depth 0
 
-[v] Architecture map document (docs/architecture-map.md) — living document, updated with each new construct
-[x] Sessions deep dive — teach the agent to dive into old session blocks when there's a misunderstanding or dispute about the context of a decision
-[x] Mandatory "Rejected" section in ADR — each decision stores rejected alternatives and reasons for rejection
-[x] Behavioral deep dive triggers — protocol for switching attention to the deep layer during review, conflict, or "why" questions
-### Depth 1 — GraphRAG Layer (optional)
+[x] Architecture map document (docs/architecture-map.md)
+[x] Sessions deep dive — agent dives into old session blocks
+[x] Mandatory "Rejected" section in ADR
+[x] Behavioral deep dive triggers
+[x] Auto-capture expanded — captures all knowledge types, not just decisions
+[x] FAR before COLD — check if knowledge recorded before discarding
+[x] docs/ for operational knowledge — rule in CLAUDE.md
+[x] /search and /graph rules + MCP tool + commands
+[x] Installer (install.sh + _knowledge/ + INTEGRATION.md)
+[x] Knowledge archaeology (/knowledge-archaeology command)
+[x] All tools connected — every command, hook, script described in CLAUDE.md
 
-Stack: LightRAG (insert_custom_kg + hybrid query) + FastEmbed (multilingual-e5-large) + OpenRouter (Gemma 3 12B / Qwen3.6 Plus for merge). Research: meta/docs/landscape/graphrag-local-stack.md
+### Depth 1
 
-[ ] MCP server (~100-150 lines Python): insert_kg, search_knowledge, delete_source, get_graph_stats
-[ ] Integration of extraction into the Secretary Protocol: Claude extracts triples on commit → insert_custom_kg
-[ ] Extraction template: standardize entity types (decision, concept, problem, domain, mechanism) and relationship types
-[ ] Query integration: /search command via MCP → LightRAG hybrid query (only_need_context=True) → Claude synthesizes the answer
-[ ] Testing: dummy LLM vs OpenRouter, multilingual-e5-large quality on RU+EN, latency at 500 docs
+[ ] /system-audit command (six lenses) — defer until 5+ real work sessions
+[ ] Meta-agent /improve — spec done (docs/specs/meta-agent-trainer.md), implementation after 5+ sessions
+[ ] update.sh — kit version update mechanism for existing users
+[ ] VPS deployment for GraphRAG (Web UI in browser)
+[ ] GraphRAG triple extraction on Soma — /graphrag extract to populate graph edges (currently 0)
 
 ## Session Context
 → meta/sessions.md (separate file; on start, the latest block is loaded)
+
+## Backlog
+
+Observations, gaps, deferred ideas. Periodically review — promote to Task Stack or remove if outdated.
+
+### Observations
+- No real-time quality monitoring — blind spot. Observe during real usage first.
+- New user first session — wall of rules (111 lines CLAUDE.md, 9-step protocol). Consider progressive disclosure after real user feedback.
+- No uninstall path — add before public release.
+- 9-step secretary protocol may be unrealistic — consider quick/full commit modes after real usage.
+- Claude Code has built-in auto-memory (autoMemoryEnabled, autoDreamEnabled) — monitor how it relates to our system.
+
+### Risks
+- Claude Code hook API changes — silent failure. Low probability, high impact.
+- CLAUDE.md + behavioral-patches.md context overload — trainer's self-viability assessment monitors this.
+- User doesn't commit for days — partially mitigated by session-start staleness check.
+
+### Deferred ideas
+- Contradiction detection between decisions (via GraphRAG)
+- CLI graph visualization
+- Trainer patches may duplicate CLAUDE.md rules — spec says "propose modifications, don't duplicate"
+- Trainer is global, GraphRAG is local — acceptable, cross-project learning via text patches
+- Archaeology + auto-capture drafts overlap in meta/drafts/ — acceptable, prefixes distinguish them
+
+### Design note
+The system started as "~30 files, one prompt." Now: 9 commands, 7 hooks, GraphRAG, trainer spec. Like FAR manages attention in context, the system itself needs attention management: HOT (essential) = CLAUDE.md, ADR, sessions, roadmap, hooks. WARM (power users) = GraphRAG, auto-capture, lint. COLD (defer) = trainer, /system-audit, VPS.
