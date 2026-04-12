@@ -351,6 +351,51 @@ The trainer tracks improvement velocity:
 
 Improvement-log rotation: entries older than 6 months are moved to `~/.claude/improvement-log-archive.md`. The active log stays focused on recent changes.
 
+## Self-Viability Assessment
+
+The trainer must regularly evaluate whether it's actually working — not just producing patches, but producing change.
+
+### What to measure
+
+At every /improve run (after run #3), the trainer asks:
+
+**1. Patch effectiveness:** "Of the active patches — do I see evidence that Claude's behavior changed? Specifically: errors that patches were meant to prevent — did they recur or not?"
+
+**2. False positive rate:** "Did any patch cause Claude to behave WORSE? Did the user push back on behavior that a patch introduced?"
+
+**3. Signal vs noise:** "How many of my findings this run are genuinely new vs variations of things I already caught? Am I finding diminishing returns?"
+
+**4. KEEP-patch freshness:** "Are KEEP-patches still protecting relevant behavior, or has the context changed and they're now creating rigidity?"
+
+### Self-report
+
+Every 5 runs, the trainer generates a viability report (in improvement-log.md):
+
+```
+## Viability Assessment — run #10
+
+Patches active: 12 | trial: 3 | archived: 4 | KEEP: 5
+Confirmed effective (behavior changed): 7 of 12
+Uncertain (no opportunity to test): 3 of 12
+Possibly ineffective (same errors recurred): 2 of 12
+False positives (user pushback): 0
+KEEP-patches reviewed: 5, all still relevant
+
+Verdict: system is productive. 58% confirmed effective rate.
+Recommendation: continue at current frequency.
+```
+
+If confirmed effective rate drops below 30% for 3 consecutive assessments → trainer suggests: "Behavioral patches may not be effective enough as an instrument. Consider: (1) patches are too abstract — try more concrete, (2) patches work but Claude doesn't read them reliably — try hook-based delivery, (3) this approach has fundamental limits — discuss with user."
+
+### Patch accumulation control
+
+Inspired by FAR's HOT-layer principle (max 3-5 items for attention), patches need attention management too:
+
+- At every run, trainer reviews: is behavioral-patches.md becoming a "wall of text"?
+- If more than 25 active patches → mandatory consolidation: merge related patches, archive low-evidence ones
+- Trainer can propose "patch groups" — thematically related patches combined into a single compound patch
+- Anti-entropy rule: every new patch should either replace an existing one or demonstrably add unique value. No accumulation for accumulation's sake.
+
 ## Multi-Project Learning
 
 The trainer operates at global level (`~/.claude/`). When analyzing sessions from different projects:
