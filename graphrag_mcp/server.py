@@ -110,8 +110,16 @@ TOOLS = [
 
 
 class GraphRAGServer:
-    def __init__(self, bridge: GraphRAGBridge):
+    def __init__(self, bridge: GraphRAGBridge | None = None):
         self._bridge = bridge
+        self._initialized = bridge is not None
+
+    async def _ensure_initialized(self):
+        """Lazy initialization — loads model + graph on first tool call, not at startup."""
+        if not self._initialized:
+            config = load_config()
+            self._bridge = await GraphRAGBridge.create(config=config)
+            self._initialized = True
 
     @classmethod
     async def create(
@@ -121,13 +129,11 @@ class GraphRAGServer:
     ) -> "GraphRAGServer":
         if bridge:
             return cls(bridge)
-        config = load_config()
-        if working_dir:
-            config.working_dir = working_dir
-        bridge = await GraphRAGBridge.create(config=config)
-        return cls(bridge)
+        # Don't initialize eagerly — return empty server, init on first call
+        return cls()
 
     async def handle_tool(self, name: str, arguments: dict) -> str:
+        await self._ensure_initialized()
         if name == "insert_kg":
             kg = json.loads(arguments["custom_kg"])
             result = await self._bridge.insert_kg(kg)
